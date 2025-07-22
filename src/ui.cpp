@@ -7541,7 +7541,7 @@ void Ui::DrawBeautifulTopBar()
   ApplyBeautifulColors(m_TopWin, COLOR_BEAUTIFUL_HEADER);
   
   // Create a beautiful title with icons
-  std::string title = "✉ Falanet Terminal Email Client ✉";
+  std::string title = "Falanet";
   int titleX = (m_ScreenWidth - title.length()) / 2;
   if (titleX > 0) {
     mvwaddstr(m_TopWin, 0, titleX, title.c_str());
