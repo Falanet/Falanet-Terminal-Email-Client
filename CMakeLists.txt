@@ -255,6 +255,57 @@ macro(add_theme themename)
 endmacro()
 add_theme("default.conf")
 
+# Configuration template
+configure_file(main.conf ${CMAKE_CURRENT_BINARY_DIR}/share/falanet/main.conf COPYONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/falanet/main.conf DESTINATION share/falanet)
+
+# Install main.conf to user's config directory if it doesn't exist
+install(CODE "
+  # Get the actual user's home directory (handles sudo case)
+  set(ACTUAL_USER_HOME \"\")
+  if(DEFINED ENV{SUDO_USER})
+    # Running with sudo, get the original user's home
+    execute_process(COMMAND getent passwd \"$ENV{SUDO_USER}\"
+                    OUTPUT_VARIABLE USER_INFO
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(USER_INFO)
+      string(REPLACE \":\" \";\" USER_INFO_LIST \"\${USER_INFO}\")
+      list(GET USER_INFO_LIST 5 ACTUAL_USER_HOME)
+    endif()
+  endif()
+  
+  # Fallback to current HOME if not running with sudo or if detection failed
+  if(NOT ACTUAL_USER_HOME OR ACTUAL_USER_HOME STREQUAL \"\")
+    set(ACTUAL_USER_HOME \"$ENV{HOME}\")
+  endif()
+  
+  set(USER_CONFIG_DIR \"\${ACTUAL_USER_HOME}/.config/falanet\")
+  set(USER_CONFIG_FILE \"\${ACTUAL_USER_HOME}/.config/falanet/main.conf\")
+  
+  message(STATUS \"Target user home: \${ACTUAL_USER_HOME}\")
+  
+  # Create config directory if it doesn't exist
+  if(NOT EXISTS \"\${USER_CONFIG_DIR}\")
+    file(MAKE_DIRECTORY \"\${USER_CONFIG_DIR}\")
+    message(STATUS \"Created config directory: \${USER_CONFIG_DIR}\")
+  endif()
+  
+  # Copy main.conf to user config if it doesn't exist
+  if(NOT EXISTS \"\${USER_CONFIG_FILE}\")
+    file(COPY \"${CMAKE_CURRENT_BINARY_DIR}/share/falanet/main.conf\" DESTINATION \"\${USER_CONFIG_DIR}\")
+    message(STATUS \"Installed default config: \${USER_CONFIG_FILE}\")
+    
+    # Set proper ownership if we're running as root
+    if(DEFINED ENV{SUDO_USER} AND DEFINED ENV{SUDO_UID} AND DEFINED ENV{SUDO_GID})
+      execute_process(COMMAND chown -R \"$ENV{SUDO_UID}:$ENV{SUDO_GID}\" \"\${USER_CONFIG_DIR}\"
+                      ERROR_QUIET)
+      message(STATUS \"Set ownership to user: $ENV{SUDO_USER}\")
+    endif()
+  else()
+    message(STATUS \"Config file already exists: \${USER_CONFIG_FILE}\")
+  endif()
+")
+
 # Uninstall
 add_custom_target(uninstall
   COMMAND "${CMAKE_COMMAND}" -E remove "${CMAKE_INSTALL_PREFIX}/bin/falanet"
