@@ -1267,7 +1267,6 @@ void Ui::DrawMessageList()
       std::string shortDate;
       std::string shortFrom;
       std::string subject;
-      bool hasAttachment = false;
       auto hit = headers.find(uid);
       if (hit != headers.end())
       {
@@ -1282,56 +1281,27 @@ void Ui::DrawMessageList()
         {
           shortFrom = header.GetShortFrom();
         }
-        hasAttachment = header.GetHasAttachments();
       }
 
       bool isSelected = (folderSelectedUids.find(uid) != folderSelectedUids.end());
       bool isCurrent = (i == m_MessageListCurrentIndex[m_CurrentFolder]);
 
-      // Beautiful message line construction
-      std::string messageIcons;
+      // Beautiful message line construction - with simple unread mark and date on right
       std::string messageText;
       
-      // Status icon (read/unread)
-      if (isUnread)
-      {
-        messageIcons += GetUnicodeSymbol(SYMBOL_UNREAD);
-      }
-      else
-      {
-        messageIcons += GetUnicodeSymbol(SYMBOL_READ);
-      }
-      
-      // Selection indicator
-      if (isSelected)
-      {
-        messageIcons += " " + GetUnicodeSymbol(SYMBOL_SELECTED);
-      }
-      else
-      {
-        messageIcons += "  ";
-      }
-      
-      // Attachment icon
-      if (hasAttachment)
-      {
-        messageIcons += " " + GetUnicodeSymbol(SYMBOL_ATTACHMENT);
-      }
-      else
-      {
-        messageIcons += "  ";
-      }
+      // Add simple unread/read indicator
+      std::string unreadMark = isUnread ? "●" : "○";
       
       // Format and color the message line
       shortDate = Util::TrimPadString(shortDate, 10);
       shortFrom = Util::ToString(Util::TrimPadWString(Util::ToWString(shortFrom), 18));
       
-      // Calculate available width for subject
-      int iconsWidth = Util::WStringWidth(Util::ToWString(messageIcons));
+      // Calculate available width for subject (mark + from + padding + date on right)
+      int markWidth = 2; // mark + space
       int dateWidth = 10;
       int fromWidth = 18;
       int padding = 6; // spaces between fields
-      int subjectWidth = m_ScreenWidth - iconsWidth - dateWidth - fromWidth - padding - 2;
+      int subjectWidth = m_ScreenWidth - markWidth - fromWidth - dateWidth - padding - 2;
       
       subject = Util::ToString(Util::TrimPadWString(Util::ToWString(subject), subjectWidth));
       
@@ -1357,15 +1327,9 @@ void Ui::DrawMessageList()
       int yPos = i - idxOffs;
       int xPos = 0;
       
-      // Icons section
-      mvwaddstr(m_MainWin, yPos, xPos, messageIcons.c_str());
-      xPos += iconsWidth + 1;
-      
-      // Date section with subtle color
-      wattron(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
-      mvwaddstr(m_MainWin, yPos, xPos, shortDate.c_str());
-      wattroff(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
-      xPos += dateWidth + 1;
+      // Unread mark
+      mvwaddstr(m_MainWin, yPos, xPos, unreadMark.c_str());
+      xPos += markWidth;
       
       // From section with sender color
       wattron(m_MainWin, m_BeautifulColors[COLOR_SENDER_NAME]);
@@ -1381,6 +1345,11 @@ void Ui::DrawMessageList()
       wattroff(m_MainWin, isCurrent ? m_BeautifulColors[COLOR_ACTIVE_SUBJECT] : 
                           isUnread ? m_BeautifulColors[COLOR_UNREAD_SUBJECT] : 
                           m_BeautifulColors[COLOR_SUBJECT_TEXT]);
+      
+      // Date section on the right with subtle color
+      wattron(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
+      mvwaddstr(m_MainWin, yPos, m_ScreenWidth - dateWidth - 1, shortDate.c_str());
+      wattroff(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
       
       // Turn off main coloring
       if (isCurrent)
@@ -1551,7 +1520,6 @@ void Ui::DrawMessageListSearch()
                               std::max(0, (int)headers.size() - (int)m_MainWinHeight));
     int idxMax = idxOffs + std::min(m_MainWinHeight, (int)headers.size());
     const std::string& currentDate = Header::GetCurrentDate();
-    bool hasAttrsSelected = (m_AttrsSelectedItem != A_NORMAL);
 
     werase(m_MainWin);
 
@@ -1560,7 +1528,6 @@ void Ui::DrawMessageListSearch()
       const std::string& folder = m_MessageListSearchResultFolderUids.at(i).first;
       const int uid = m_MessageListSearchResultFolderUids.at(i).second;
 
-      bool isUnread = false;
       {
         std::lock_guard<std::mutex> lock(m_Mutex);
 
@@ -1572,51 +1539,52 @@ void Ui::DrawMessageListSearch()
           fetchFlagUids[folder].insert(uid);
           requestedFlags.insert(uid);
         }
-
-        isUnread = ((flags.find(uid) != flags.end()) && (!Flag::GetSeen(flags.at(uid))));
       }
 
-      static const std::wstring wUnreadIndicator = Util::ToWString(m_UnreadIndicator);
-      static const int unreadIndicatorWidth = Util::WStringWidth(wUnreadIndicator);
-      std::string unreadFlag = isUnread ? std::string(m_UnreadIndicator)
-                                        : std::string(unreadIndicatorWidth, ' ');
+      // Check if message is unread
+      bool isUnread = false;
+      {
+        std::lock_guard<std::mutex> lock(m_Mutex);
+        std::map<uint32_t, uint32_t>& flags = m_Flags[folder];
+        isUnread = ((flags.find(uid) != flags.end()) && (!Flag::GetSeen(flags.at(uid))));
+      }
 
       std::string shortDate;
       std::string shortFrom;
       std::string subject;
-      std::string attachFlag;
       {
         Header& header = headers[i];
         shortDate = header.GetDateOrTime(currentDate);
         shortFrom = header.GetShortFrom();
         subject = header.GetSubject();
-
-        if (!m_AttachmentIndicator.empty())
-        {
-          static const std::wstring wIndicator = Util::ToWString(m_AttachmentIndicator);
-          static const int indicatorWidth = Util::WStringWidth(wIndicator);
-          attachFlag = header.GetHasAttachments() ? std::string(m_AttachmentIndicator)
-                                                  : std::string(indicatorWidth, ' ');
-        }
       }
 
+      // Add simple unread/read indicator
+      std::string unreadMark = isUnread ? "●" : "○";
+
+      shortDate = Util::TrimPadString(shortDate, 10);
+      shortFrom = Util::ToString(Util::TrimPadWString(Util::ToWString(shortFrom), 20));
+      
+      // Calculate layout with mark at start, date on right
+      std::string folderTag = m_SearchShowFolder ? ("  [" + Util::BaseName(folder) + "]") : "";
+      int markWidth = 2; // mark + space
+      int dateWidth = 10;
+      int fromWidth = 20;
+      int padding = 4;
+      int subjectWidth = m_ScreenWidth - markWidth - fromWidth - dateWidth - 
+                        Util::WStringWidth(Util::ToWString(folderTag)) - padding - 2;
+      
+      subject = Util::ToString(Util::TrimPadWString(Util::ToWString(subject), subjectWidth));
+      std::string header = unreadMark + " " + shortFrom + "  " + subject + folderTag;
+
+      bool isCurrent = (i == m_MessageListCurrentIndex[m_CurrentFolder]);
+
+      // Check if message is selected
       auto selectedUidsIt = m_SelectedUids.find(folder);
       std::set<uint32_t> noSelection;
       const std::set<uint32_t>& folderSelectedUids =
         (selectedUidsIt != m_SelectedUids.end()) ? selectedUidsIt->second : noSelection;
       bool isSelected = (folderSelectedUids.find(uid) != folderSelectedUids.end());
-      std::string selectFlag = (isSelected && !hasAttrsSelected) ? "X" : " ";
-
-      shortDate = Util::TrimPadString(shortDate, 10);
-      shortFrom = Util::ToString(Util::TrimPadWString(Util::ToWString(shortFrom), 20));
-      std::string headerLeft = selectFlag + unreadFlag + " " + attachFlag + "  " + shortDate + "  " + shortFrom + "  ";
-
-      std::string folderTag = m_SearchShowFolder ? ("  [" + Util::BaseName(folder) + "]") : "";
-      int subjectWidth = m_ScreenWidth - Util::WStringWidth(Util::ToWString(headerLeft + folderTag)) - 1;
-      subject = Util::ToString(Util::TrimPadWString(Util::ToWString(subject), subjectWidth));
-      std::string header = headerLeft + subject + folderTag + " ";
-
-      bool isCurrent = (i == m_MessageListCurrentIndex[m_CurrentFolder]);
 
       if (isCurrent)
       {
@@ -1628,8 +1596,11 @@ void Ui::DrawMessageListSearch()
         wattron(m_MainWin, isCurrent ? m_AttrsSelectedHighlighted : m_AttrsSelectedItem);
       }
 
-      std::wstring wheader = Util::TrimPadWString(Util::ToWString(header), m_ScreenWidth - 1) + L" ";;
-      mvwaddnwstr(m_MainWin, i - idxOffs, 0, wheader.c_str(), std::min((int)wheader.size(), m_ScreenWidth));
+      std::wstring wheader = Util::TrimPadWString(Util::ToWString(header), m_ScreenWidth - dateWidth - 2) + L" ";
+      mvwaddnwstr(m_MainWin, i - idxOffs, 0, wheader.c_str(), std::min((int)wheader.size(), m_ScreenWidth - dateWidth - 2));
+      
+      // Draw date on the right
+      mvwaddstr(m_MainWin, i - idxOffs, m_ScreenWidth - dateWidth - 1, shortDate.c_str());
 
       if (isSelected)
       {
