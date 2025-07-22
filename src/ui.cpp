@@ -7438,7 +7438,7 @@ void Ui::InitBeautifulColors()
   if (!m_ColorsEnabled) return;
   
   // Initialize beautiful color pairs with new enum names
-  init_pair(COLOR_BEAUTIFUL_HEADER, COLOR_WHITE, COLOR_BLUE);
+  init_pair(COLOR_BEAUTIFUL_HEADER, COLOR_BLACK, COLOR_WHITE);  // High contrast: black text on white background
   init_pair(COLOR_ACTIVE_ITEM, COLOR_WHITE, COLOR_BLUE);
   init_pair(COLOR_SELECTED_ITEM, COLOR_BLACK, COLOR_CYAN);
   init_pair(COLOR_UNREAD_ITEM, COLOR_YELLOW, COLOR_BLACK);
@@ -7585,10 +7585,16 @@ void Ui::DrawBeautifulStatusLine(const std::string& status, const std::string& t
   
   ApplyBeautifulColors(m_DialogWin, colorType);
   
+  // Add bold attribute for high contrast
+  if (m_ColorsEnabled) {
+    wattron(m_DialogWin, A_BOLD);
+  }
+  
   std::string fullMessage = icon + status;
   mvwaddstr(m_DialogWin, 0, 1, fullMessage.c_str());
   
   if (m_ColorsEnabled) {
+    wattroff(m_DialogWin, A_BOLD);
     wattroff(m_DialogWin, COLOR_PAIR(colorType));
   }
   
@@ -7604,6 +7610,11 @@ void Ui::DrawBeautifulProgressBar(int percentage, const std::string& operation)
   
   werase(m_DialogWin);
   ApplyBeautifulColors(m_DialogWin, COLOR_BEAUTIFUL_HEADER);
+  
+  // Add bold attribute for high contrast
+  if (m_ColorsEnabled) {
+    wattron(m_DialogWin, A_BOLD);
+  }
   
   // Draw progress bar with Unicode blocks
   std::string progressBar = "[";
@@ -7623,6 +7634,7 @@ void Ui::DrawBeautifulProgressBar(int percentage, const std::string& operation)
   mvwaddstr(m_DialogWin, 0, 1, progressBar.c_str());
   
   if (m_ColorsEnabled) {
+    wattroff(m_DialogWin, A_BOLD);
     wattroff(m_DialogWin, COLOR_PAIR(COLOR_BEAUTIFUL_HEADER));
   }
   
