@@ -1,4 +1,4 @@
-# Falanet Terminal Email Client 📧
+# Falanet Terminal Email Client
 
 A beautiful, fast, and feature-rich terminal-based email client designed specifically for the Falanet mail service with modern UI enhancements.
 
@@ -6,16 +6,16 @@ A beautiful, fast, and feature-rich terminal-based email client designed specifi
 ![Platform](https://img.shields.io/badge/platform-Linux%20|%20macOS-lightgrey.svg)
 ![Language](https://img.shields.io/badge/language-C%2B%2B-blue.svg)
 
-## ✨ Features
+## Features
 
-### 🎨 Beautiful Modern Interface
+### Beautiful Modern Interface
 - **Enhanced UI** with stunning colors and Unicode icons
-- **Folder-specific icons** (📥 Inbox, 📤 Sent, 🗑️ Trash, etc.)
+- **Folder-specific icons** (Inbox, Sent, Trash, etc.)
 - **Color-coded message states** (unread, selected, active)
 - **Beautiful status bars** and progress indicators
 - **Syntax highlighting** for email headers, quotes, and URLs
 
-### 📧 Core Email Features
+### Core Email Features
 - **Falanet IMAP & SMTP** integration
 - **HTML email rendering** with enhanced terminal display
 - **Attachment handling** with visual indicators
@@ -24,7 +24,7 @@ A beautiful, fast, and feature-rich terminal-based email client designed specifi
 - **Address book** auto-generated from contacts
 - **Offline composition** capabilities
 
-### 🔧 Advanced Features
+### Advanced Features
 - **Multi-threaded** background operations
 - **Local caching** with SQLite (optional AES256 encryption)
 - **External editor** integration ($EDITOR)
@@ -33,28 +33,12 @@ A beautiful, fast, and feature-rich terminal-based email client designed specifi
 - **Custom signatures**
 - **Configurable themes** and colors
 
-### 🚀 Quick Setup
+### Quick Setup
 - **Simple configuration** files
 - **Intuitive keybindings** similar to Alpine/Pine
 - **Optimized for Falanet** mail service
 
-## 🖼️ Screenshots
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                               Falanet                                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ 📥 ● Important Meeting Tomorrow        Alice Johnson      2025-07-22 14:30  │
-│ 📎 ○ Project Update - Q3 Results       Bob Smith         2025-07-22 13:15  │
-│ ✓ ○ Re: Vacation Request Approved      HR Department     2025-07-22 11:45  │
-│ 📥 ● Weekend Plans?                    Sarah Williams    2025-07-21 18:20  │
-│ ○ ○ Newsletter - Tech Updates          TechNews          2025-07-21 16:00  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ Folder: INBOX - Use arrow keys to navigate                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-## 🚀 Installation
+## Installation
 
 ### Quick Install (Recommended)
 
@@ -112,7 +96,7 @@ sudo make install
 
 </details>
 
-## ⚡ Quick Start
+## Quick Start
 
 ### First Run Setup
 ```bash
@@ -142,7 +126,7 @@ falanet [OPTIONS]
 -x, --export <DIR>      Export cache to Maildir format
 ```
 
-## 🎨 Customization
+## Customization
 
 ### Theme Configuration
 Edit `~/.config/falanet/themes/default.conf`:
@@ -178,7 +162,7 @@ color_date_stamp_fg=green
 - `/` - Find in message
 - `q` - Quit
 
-## 📁 Configuration Files
+## Configuration Files
 
 ```
 ~/.config/falanet/
@@ -215,7 +199,7 @@ user=your-username@falanet.org
 
 Replace `your-username` with your actual Falanet username and `Your Full Name` with your display name.
 
-## 🌟 Enhanced Features
+## Enhanced Features
 
 ### Beautiful UI Elements
 - **Unicode Icons**: Visual indicators for different message types
@@ -236,7 +220,7 @@ Replace `your-username` with your actual Falanet username and `Your Full Name` w
 - **Search Highlighting**: Results highlighted in message view
 - **Quick Filters**: Unread, attachments, date-based filters
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 <details>
 <summary>Common Issues and Solutions</summary>
@@ -275,7 +259,7 @@ colors_enabled=true
 
 </details>
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Here's how you can help:
 
@@ -293,7 +277,7 @@ cd Falanet-Terminal-Email-Client
 ./make.sh build
 ```
 
-## 📋 System Requirements
+## System Requirements
 
 - **OS**: Linux (Ubuntu 18.04+), macOS (10.14+)
 - **CPU**: x86_64, ARM64
@@ -301,7 +285,7 @@ cd Falanet-Terminal-Email-Client
 - **Terminal**: xterm, gnome-terminal, iTerm2, or compatible
 - **Network**: Internet connection for email sync
 
-## 🔒 Security Features
+## Security Features
 
 - **AES256 Encryption**: Optional local cache encryption
 - **TLS/SSL**: Encrypted connections to Falanet email servers
@@ -309,40 +293,40 @@ cd Falanet-Terminal-Email-Client
 - **No Password Storage**: Secure credential handling
 - **Local Cache**: All data stored locally
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Based on the original nmail project
 - Enhanced UI inspired by modern terminal applications
 - Community feedback and contributions
 - Email protocol implementations using libetpan
 
-## 📞 Support
+## Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/Falanet/Falanet-Terminal-Email-Client/discussions)
-- 📧 **Email**: Create an issue for support requests
-- 📚 **Documentation**: Check the [Wiki](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki)
+- Bug Reports: [GitHub Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues)
+- Discussions: [GitHub Discussions](https://github.com/Falanet/Falanet-Terminal-Email-Client/discussions)
+- Email: Create an issue for support requests
+- Documentation: Check the [Wiki](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki)
 
 ---
 
 <div align="center">
 
-**⭐ Star this repository if you find it useful!**
+**Star this repository if you find it useful!**
 
 [Homepage](https://github.com/Falanet/Falanet-Terminal-Email-Client) • 
 [Documentation](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki) • 
 [Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues) • 
 [Releases](https://github.com/Falanet/Falanet-Terminal-Email-Client/releases)
 
-Made with ❤️ by the Falanet community
+Made with love by the Falanet community
 
 </div>
 
-## 📧 Usage Guide
+## Usage Guide
 
 Email Viewer
 ============
@@ -572,7 +556,7 @@ file (platform-dependent defaults are left empty below):
 ### attachment_indicator
 
 Controls which character to indicate that an email has attachments
-(default: `📎`). For a more plain layout one can use an ascii character: `+`.
+(default: `+`). For a more plain layout one can use an ascii character: `+`.
 
 ### bottom_reply
 
@@ -779,7 +763,7 @@ Specifies custom terminal title, ex: `terminal_title=falanet - d99kris@email.com
 ### unread_indicator
 
 Controls which character to indicate that an email is unread (default: `N`).
-For a more graphical interface, an emoji such as `✉` can be used.
+For a more graphical interface, a character such as `*` can be used.
 
 
 ~/.config/falanet/colors.conf
