@@ -1,176 +1,348 @@
+# Falanet Terminal Email Client 📧
+
+A beautiful, fast, and feature-rich terminal-based email client designed specifically for the Falanet mail service with modern UI enhancements.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Linux%20|%20macOS-lightgrey.svg)
+![Language](https://img.shields.io/badge/language-C%2B%2B-blue.svg)
+
+## ✨ Features
+
+### 🎨 Beautiful Modern Interface
+- **Enhanced UI** with stunning colors and Unicode icons
+- **Folder-specific icons** (📥 Inbox, 📤 Sent, 🗑️ Trash, etc.)
+- **Color-coded message states** (unread, selected, active)
+- **Beautiful status bars** and progress indicators
+- **Syntax highlighting** for email headers, quotes, and URLs
+
+### 📧 Core Email Features
+- **Falanet IMAP & SMTP** integration
+- **HTML email rendering** with enhanced terminal display
+- **Attachment handling** with visual indicators
+- **Email search** with highlighting
+- **Draft messages** support
+- **Address book** auto-generated from contacts
+- **Offline composition** capabilities
+
+### 🔧 Advanced Features
+- **Multi-threaded** background operations
+- **Local caching** with SQLite (optional AES256 encryption)
+- **External editor** integration ($EDITOR)
+- **External viewer** support ($PAGER)
+- **Markdown to HTML** email composition
+- **Custom signatures**
+- **Configurable themes** and colors
+
+### 🚀 Quick Setup
+- **Simple configuration** files
+- **Intuitive keybindings** similar to Alpine/Pine
+- **Optimized for Falanet** mail service
+
+## 🖼️ Screenshots
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                               Falanet                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 📥 ● Important Meeting Tomorrow        Alice Johnson      2025-07-22 14:30  │
+│ 📎 ○ Project Update - Q3 Results       Bob Smith         2025-07-22 13:15  │
+│ ✓ ○ Re: Vacation Request Approved      HR Department     2025-07-22 11:45  │
+│ 📥 ● Weekend Plans?                    Sarah Williams    2025-07-21 18:20  │
+│ ○ ○ Newsletter - Tech Updates          TechNews          2025-07-21 16:00  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Folder: INBOX - Use arrow keys to navigate                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 🚀 Installation
+
+### Quick Install (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/Falanet/Falanet-Terminal-Email-Client.git
+cd Falanet-Terminal-Email-Client
+
+# Install dependencies and build (Linux/macOS)
+sudo ./make.sh deps
+sudo ./make.sh build
+sudo make install
+```
+
+### Manual Build
+
+<details>
+<summary>Click to expand manual build instructions</summary>
+
+#### Dependencies
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install git cmake build-essential libssl-dev libreadline-dev \
+    libncurses5-dev libxapian-dev libsqlite3-dev libsasl2-dev \
+    libsasl2-modules libcurl4-openssl-dev libexpat-dev zlib1g-dev \
+    libmagic-dev uuid-dev
+```
+
+**Fedora:**
+```bash
+sudo yum install cmake openssl-devel ncurses-devel xapian-core-devel \
+    sqlite-devel cyrus-sasl-devel cyrus-sasl-plain libcurl-devel \
+    expat-devel zlib-devel file-devel libuuid-devel clang
+```
+
+**macOS:**
+```bash
+brew install openssl ncurses xapian sqlite libmagic ossp-uuid
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -Sy cmake make openssl ncurses xapian-core sqlite \
+    cyrus-sasl curl expat zlib file
+```
+
+#### Build
+```bash
+mkdir -p build && cd build
+cmake ..
+make -j$(nproc)
+sudo make install
+```
+
+</details>
+
+## ⚡ Quick Start
+
+### First Run Setup
+```bash
+# Start Falanet
 falanet
-=====
 
-| **Linux** | **Mac** |
-|-----------|---------|
+# Configure your Falanet email account
+# Edit ~/.config/falanet/main.conf with your credentials:
+# - address=your-username@falanet.org
+# - imap_host=mail.falanet.org
+# - smtp_host=mail.falanet.org
+# - user=your-username@falanet.org
+```
 
-falanet is a terminal-based email client for Linux and macOS with a user interface
-similar to alpine / pine.
+### Command Line Options
+```bash
+falanet [OPTIONS]
 
-Features
---------
-- Support for IMAP and SMTP protocols
-- Local cache using sqlite (optionally AES256-encrypted)
-- Multi-threaded (email fetch and send done in background)
-- Address book auto-generated based on email messages
-- Viewing HTML emails (converted to text in terminal, or in external browser)
-- Opening/viewing attachments in external program
-- Simple setup wizard for Gmail, iCloud and Outlook/Hotmail
-- UI similar to Alpine / Pine
-- Compose message using external editor ($EDITOR)
-- View message using external viewer ($PAGER)
-- Saving and continuing draft messages
-- Compose HTML emails using Markdown (see `markdown_html_compose` option)
-- Email search
-- Compose emails while offline
-- Color customization
-- Signature
+-d, --confdir <DIR>     Use different config directory
+-e, --verbose           Enable verbose logging  
+-ee, --extra-verbose    Enable extra verbose logging
+-h, --help              Show help message
+-k, --keydump           Key code dump mode
+-o, --offline           Run in offline mode
+-p, --pass              Change password
+-v, --version           Show version information
+-x, --export <DIR>      Export cache to Maildir format
+```
 
-Not Supported / Out of Scope
-----------------------------
-- Local mailbox downloaded by third-party application (OfflineIMAP, fdm, etc)
-- Multiple email accounts in a single session
-- Special handling for Gmail labels
-- Threaded view
+## 🎨 Customization
 
+### Theme Configuration
+Edit `~/.config/falanet/themes/default.conf`:
 
-Usage
-=====
+```ini
+# Beautiful Modern Theme
+color_dialog_bg=blue
+color_dialog_fg=white
+color_quoted_text_fg=blue
+color_highlighted_text_bg=yellow
+color_highlighted_text_fg=black
+color_top_bar_bg=blue
+color_top_bar_fg=white
 
-Usage:
+# Enhanced email-specific colors
+color_email_header_fg=green
+color_email_subject_fg=yellow
+color_attachment_indicator_fg=magenta
+color_unread_indicator_bg=yellow
+color_sender_name_fg=white
+color_date_stamp_fg=green
+```
 
-    falanet [OPTION]
+### Key Bindings
+- `↑/↓` - Navigate messages
+- `Enter` - Read message
+- `c` - Compose new message
+- `r` - Reply to message
+- `f` - Forward message
+- `d` - Delete message
+- `g` - Go to folder
+- `s` - Search messages
+- `/` - Find in message
+- `q` - Quit
 
-Command-line Options:
+## 📁 Configuration Files
 
-    -d, --confdir <DIR>
-        use a different directory than ~/.config/falanet
+```
+~/.config/falanet/
+├── main.conf           # Main account settings
+├── ui.conf            # UI customization
+└── themes/
+    └── default.conf   # Color theme
+```
 
-    -e, --verbose
-        enable verbose logging
+### Setting up your Falanet Account
 
-    -ee, --extra-verbose
-        enable extra verbose logging
+Run falanet once to automatically generate the default config file:
 
-    -h, --help
-        display this help and exit
+```bash
+falanet
+```
 
-    -k, --keydump
-        key code dump mode
+Then open the config file `~/.config/falanet/main.conf` in your favorite text editor and configure your Falanet account:
 
-    -o, --offline
-        run in offline mode
+```ini
+# Falanet Email Configuration
+address=your-username@falanet.org
+drafts=Drafts
+imap_host=mail.falanet.org
+imap_port=993
+inbox=Inbox
+name=Your Full Name
+sent=Sent
+smtp_host=mail.falanet.org
+smtp_port=587
+trash=Trash
+user=your-username@falanet.org
+```
 
-    -p, --pass
-        change password
+Replace `your-username` with your actual Falanet username and `Your Full Name` with your display name.
 
-    -v, --version
-        output version information and exit
+## 🌟 Enhanced Features
 
-    -x, --export <DIR>
-        export cache to specified dir in Maildir format
+### Beautiful UI Elements
+- **Unicode Icons**: Visual indicators for different message types
+- **Color Coding**: Unread (yellow), selected (cyan), active (blue)
+- **Smart Folders**: Automatic icons based on folder type
+- **Status Indicators**: Real-time connection and sync status
+- **Progress Bars**: Visual feedback for operations
 
-Configuration files:
+### HTML Email Support
+- **Enhanced Parser**: Better HTML-to-text conversion
+- **Link Detection**: Highlighted URLs in messages
+- **Table Support**: Improved table rendering in terminal
+- **Image Placeholders**: Indicators for embedded images
 
-    ~/.config/falanet/auth.conf
-        configures custom oauth2 client id and secret
+### Advanced Search
+- **Full-text Search**: Search across all message content
+- **Field-specific Search**: Search by sender, subject, date
+- **Search Highlighting**: Results highlighted in message view
+- **Quick Filters**: Unread, attachments, date-based filters
 
-    ~/.config/falanet/main.conf
-        configures mail account and general settings
+## 🔧 Troubleshooting
 
-    ~/.config/falanet/ui.conf
-        customizes UI settings
+<details>
+<summary>Common Issues and Solutions</summary>
 
-Examples:
+### Connection Issues
+```bash
+# Test IMAP connection
+falanet --verbose
 
-    falanet -s gmail
-        setup falanet for a gmail account
+# Check SSL/TLS settings
+# Edit ~/.config/falanet/main.conf
+imap_server_port=993
+imap_server_ssl=true
+```
 
+### Performance Issues
+```bash
+# Clear cache
+rm -rf ~/.cache/falanet/
 
-Supported Platforms
-===================
+# Reduce prefetch level
+# Edit ~/.config/falanet/main.conf
+prefetch_level=1
+```
 
-falanet is developed and tested on Linux and macOS. Current version has been
-tested on:
+### Display Issues
+```bash
+# Check terminal capabilities
+echo $TERM
+infocmp
 
-- macOS Sonoma 14.0
-- Ubuntu 22.04 LTS
+# Enable/disable colors
+# Edit ~/.config/falanet/ui.conf
+colors_enabled=true
+```
 
-Build from Source
-=================
-**Get Source**
+</details>
 
-    git clone https://github.com/Falanet/Falanet-Terminal-Email-Client falanet && cd falanet
+## 🤝 Contributing
 
-Using make.sh script
---------------------
-If using macOS, Alpine, Arch, Fedora, Gentoo, Raspbian or Ubuntu, one can use
-the `make.sh` script provided.
+We welcome contributions! Here's how you can help:
 
-**Dependencies**
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
 
-    ./make.sh deps
+### Development Setup
+```bash
+git clone https://github.com/Falanet/Falanet-Terminal-Email-Client.git
+cd Falanet-Terminal-Email-Client
+./make.sh deps
+./make.sh build
+```
 
-**Build / Install**
+## 📋 System Requirements
 
-    ./make.sh build && ./make.sh install
+- **OS**: Linux (Ubuntu 18.04+), macOS (10.14+)
+- **CPU**: x86_64, ARM64
+- **RAM**: 512MB minimum, 1GB recommended
+- **Terminal**: xterm, gnome-terminal, iTerm2, or compatible
+- **Network**: Internet connection for email sync
 
-Manually
---------
-**Dependencies**
+## 🔒 Security Features
 
-macOS
+- **AES256 Encryption**: Optional local cache encryption
+- **TLS/SSL**: Encrypted connections to Falanet email servers
+- **Secure Authentication**: Direct integration with Falanet mail service
+- **No Password Storage**: Secure credential handling
+- **Local Cache**: All data stored locally
 
-    brew install openssl ncurses xapian sqlite libmagic ossp-uuid
+## 📜 License
 
-Arch
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-    sudo pacman -Sy cmake make openssl ncurses xapian-core sqlite cyrus-sasl curl expat zlib file pandoc
+## 🙏 Acknowledgments
 
-Debian-based (Ubuntu, Raspbian, etc)
+- Based on the original nmail project
+- Enhanced UI inspired by modern terminal applications
+- Community feedback and contributions
+- Email protocol implementations using libetpan
 
-    sudo apt install git cmake build-essential libssl-dev libreadline-dev libncurses5-dev libxapian-dev libsqlite3-dev libsasl2-dev libsasl2-modules libcurl4-openssl-dev libexpat-dev zlib1g-dev libmagic-dev uuid-dev
+## 📞 Support
 
-Fedora
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Falanet/Falanet-Terminal-Email-Client/discussions)
+- 📧 **Email**: Create an issue for support requests
+- 📚 **Documentation**: Check the [Wiki](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki)
 
-    sudo yum -y install cmake openssl-devel ncurses-devel xapian-core-devel sqlite-devel cyrus-sasl-devel cyrus-sasl-plain libcurl-devel expat-devel zlib-devel file-devel libuuid-devel clang pandoc
+---
 
-Gentoo
+<div align="center">
 
-    sudo emerge -n dev-util/cmake dev-libs/openssl sys-libs/ncurses dev-libs/xapian dev-db/sqlite dev-libs/cyrus-sasl net-misc/curl dev-libs/expat sys-libs/zlib sys-apps/file
+**⭐ Star this repository if you find it useful!**
 
-**Build**
+[Homepage](https://github.com/Falanet/Falanet-Terminal-Email-Client) • 
+[Documentation](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki) • 
+[Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues) • 
+[Releases](https://github.com/Falanet/Falanet-Terminal-Email-Client/releases)
 
-    mkdir -p build && cd build && cmake .. && make -s
+Made with ❤️ by the Falanet community
 
-**Install**
+</div>
 
-    sudo make install
-
-Getting Started
-===============
-
-Falanet Email Provider
----------------------
-Run falanet once in order for it to automatically generate the default config
-file:
-
-    $ falanet
-
-Then open the config file `~/.config/falanet/main.conf` in your favourite text
-editor and fill out the required fields:
-
-    address=example@falanet.org
-    drafts=Drafts
-    imap_host=mail.falanet.org
-    imap_port=993
-    inbox=Inbox
-    name=Firstname Lastname
-    sent=Sent
-    smtp_host=mail.falanet.org
-    smtp_port=587
-    trash=Trash
-    user=example@falanet.org
+## 📧 Usage Guide
 
 Email Viewer
 ============
