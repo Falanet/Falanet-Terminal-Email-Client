@@ -115,6 +115,46 @@ public:
     LineWrapHardWrap = 2,
   };
 
+  // Beautiful UI Enhancement Enums
+  enum BeautifulColors
+  {
+    COLOR_BEAUTIFUL_HEADER = 1,
+    COLOR_ACTIVE_ITEM,
+    COLOR_SELECTED_ITEM,
+    COLOR_UNREAD_ITEM,
+    COLOR_NORMAL_ITEM,
+    COLOR_FOLDER_ITEM,
+    COLOR_DATE_TIME,
+    COLOR_SENDER_NAME,
+    COLOR_SUBJECT_TEXT,
+    COLOR_ACTIVE_SUBJECT,
+    COLOR_UNREAD_SUBJECT,
+    COLOR_HEADER_NAME,
+    COLOR_HEADER_VALUE,
+    COLOR_QUOTED_TEXT,
+    COLOR_URL_LINK,
+    COLOR_MESSAGE_TEXT,
+    COLOR_SEARCH_MATCH,
+    COLOR_ATTACHMENT_INFO
+  };
+
+  enum UISymbols
+  {
+    SYMBOL_UNREAD,
+    SYMBOL_READ,
+    SYMBOL_SELECTED,
+    SYMBOL_ATTACHMENT,
+    SYMBOL_IMPORTANT,
+    SYMBOL_FOLDER,
+    SYMBOL_INBOX,
+    SYMBOL_SENT,
+    SYMBOL_DRAFTS,
+    SYMBOL_DRAFT,
+    SYMBOL_TRASH,
+    SYMBOL_SPAM,
+    SYMBOL_ARCHIVE
+  };
+
   Ui(const std::string& p_Inbox, const std::string& p_Address, const std::string& p_Name,
      uint32_t p_PrefetchLevel, bool p_PrefetchAllHeaders);
   virtual ~Ui();
@@ -163,6 +203,21 @@ private:
   void DrawMessage();
   void DrawComposeMessage();
   void DrawPartList();
+
+  // Beautiful UI Enhancement Methods
+  void InitBeautifulColors();
+  std::string GetUnicodeSymbol(UISymbols symbol);
+  void DrawBeautifulBorder(WINDOW* window, const std::string& title = "", bool isActive = false);
+  void DrawBeautifulTopBar();
+  void DrawBeautifulMessageList();
+  void DrawBeautifulMessage();
+  void DrawBeautifulStatusLine(const std::string& status, const std::string& type = "info");
+  void DrawBeautifulProgressBar(int percentage, const std::string& operation = "");
+  void DrawBeautifulIcons(WINDOW* window, int y, int x, UISymbols symbol);
+  std::string GetBeautifulSymbol(UISymbols symbol);
+  std::string FormatBeautifulSize(size_t bytes);
+  std::string FormatBeautifulDate(const std::string& timestamp);
+  void ApplyBeautifulColors(WINDOW* window, BeautifulColors colorType);
 
   void AsyncUiRequest(char p_UiRequest);
   void PerformUiRequest(char p_UiRequest);
@@ -584,6 +639,9 @@ private:
 
   std::unique_ptr<SleepDetect> m_SleepDetect;
   std::unique_ptr<HtmlParser> m_HtmlParser;
+
+  // Beautiful color pairs for enhanced UI
+  chtype m_BeautifulColors[20];
 
 private:
   static bool s_Running;

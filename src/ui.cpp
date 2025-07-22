@@ -343,6 +343,9 @@ void Ui::Init()
     }
 
     colorsConfig.Save();
+    
+    // Initialize beautiful colors for enhanced UI
+    InitBeautifulColors();
   }
 
   m_AttachmentIndicator = m_Config.Get("attachment_indicator");
@@ -536,6 +539,13 @@ void Ui::DrawAll()
 
 void Ui::DrawTop()
 {
+  // Use beautiful top bar if colors are enabled
+  if (m_ColorsEnabled) {
+    DrawBeautifulTopBar();
+    return;
+  }
+  
+  // Fallback to original design for non-color terminals
   werase(m_TopWin);
   wattron(m_TopWin, m_AttrsTopBar);
 
@@ -955,22 +965,68 @@ void Ui::DrawFolderList()
                               std::max(0, (int)folders.size() - (int)itemsMax));
     int idxMax = idxOffs + std::min(itemsMax, (int)folders.size());
 
+    // Beautiful folder list rendering
     for (int i = idxOffs; i < idxMax; ++i)
     {
       const std::string& folder = *std::next(folders.begin(), i);
+      bool isCurrent = (i == m_FolderListCurrentIndex);
 
-      if (i == m_FolderListCurrentIndex)
+      if (isCurrent)
       {
-        wattron(m_MainWin, m_AttrsHighlightedText);
         m_FolderListCurrentFolder = folder;
+        wattron(m_MainWin, m_BeautifulColors[COLOR_ACTIVE_ITEM]);
+      }
+      else
+      {
+        wattron(m_MainWin, m_BeautifulColors[COLOR_FOLDER_ITEM]);
       }
 
-      std::wstring wfolder = Util::ToWString(folder);
-      mvwaddnwstr(m_MainWin, i - idxOffs, 2, wfolder.c_str(), wfolder.size());
-
-      if (i == m_FolderListCurrentIndex)
+      // Add beautiful folder icons based on folder type
+      std::string folderIcon = GetUnicodeSymbol(SYMBOL_FOLDER);
+      std::string lowerFolder = Util::ToLower(folder);
+      
+      if (lowerFolder.find("inbox") != std::string::npos)
       {
-        wattroff(m_MainWin, m_AttrsHighlightedText);
+        folderIcon = GetUnicodeSymbol(SYMBOL_INBOX);
+      }
+      else if (lowerFolder.find("sent") != std::string::npos || 
+               lowerFolder.find("outbox") != std::string::npos)
+      {
+        folderIcon = GetUnicodeSymbol(SYMBOL_SENT);
+      }
+      else if (lowerFolder.find("draft") != std::string::npos)
+      {
+        folderIcon = GetUnicodeSymbol(SYMBOL_DRAFT);
+      }
+      else if (lowerFolder.find("trash") != std::string::npos || 
+               lowerFolder.find("deleted") != std::string::npos)
+      {
+        folderIcon = GetUnicodeSymbol(SYMBOL_TRASH);
+      }
+      else if (lowerFolder.find("spam") != std::string::npos || 
+               lowerFolder.find("junk") != std::string::npos)
+      {
+        folderIcon = GetUnicodeSymbol(SYMBOL_SPAM);
+      }
+      else if (lowerFolder.find("archive") != std::string::npos)
+      {
+        folderIcon = GetUnicodeSymbol(SYMBOL_ARCHIVE);
+      }
+
+      // Beautiful folder display with icon and name
+      int yPos = i - idxOffs;
+      mvwaddstr(m_MainWin, yPos, 1, folderIcon.c_str());
+      
+      std::wstring wfolder = Util::ToWString(folder);
+      mvwaddnwstr(m_MainWin, yPos, 3, wfolder.c_str(), wfolder.size());
+
+      if (isCurrent)
+      {
+        wattroff(m_MainWin, m_BeautifulColors[COLOR_ACTIVE_ITEM]);
+      }
+      else
+      {
+        wattroff(m_MainWin, m_BeautifulColors[COLOR_FOLDER_ITEM]);
       }
     }
   }
@@ -981,6 +1037,10 @@ void Ui::DrawFolderList()
       m_FolderListCurrentFolder = "";
     }
   }
+
+  // Beautiful status line for folder list
+  std::string folderListInfo = "Select folder - Use arrow keys to navigate";
+  DrawBeautifulStatusLine(folderListInfo, "folders");
 
   wrefresh(m_MainWin);
 }
@@ -1191,8 +1251,6 @@ void Ui::DrawMessageList()
       }
     }
 
-    bool hasAttrsSelected = (m_AttrsSelectedItem != A_NORMAL);
-
     werase(m_MainWin);
 
     int idxOffs = Util::Bound(0, (int)(m_MessageListCurrentIndex[m_CurrentFolder] -
@@ -1205,15 +1263,11 @@ void Ui::DrawMessageList()
       uint32_t uid = std::prev(displayUids.end(), i + 1)->second;
 
       bool isUnread = ((flags.find(uid) != flags.end()) && (!Flag::GetSeen(flags.at(uid))));
-      static const std::wstring wUnreadIndicator = Util::ToWString(m_UnreadIndicator);
-      static const int unreadIndicatorWidth = Util::WStringWidth(wUnreadIndicator);
-      std::string unreadFlag = isUnread ? std::string(m_UnreadIndicator)
-                                        : std::string(unreadIndicatorWidth, ' ');
-
+      // Beautiful message item rendering with modern icons and colors
       std::string shortDate;
       std::string shortFrom;
       std::string subject;
-      std::string attachFlag;
+      bool hasAttachment = false;
       auto hit = headers.find(uid);
       if (hit != headers.end())
       {
@@ -1228,49 +1282,122 @@ void Ui::DrawMessageList()
         {
           shortFrom = header.GetShortFrom();
         }
-
-        if (!m_AttachmentIndicator.empty())
-        {
-          static const std::wstring wIndicator = Util::ToWString(m_AttachmentIndicator);
-          static const int indicatorWidth = Util::WStringWidth(wIndicator);
-          attachFlag = header.GetHasAttachments() ? std::string(m_AttachmentIndicator)
-                                                  : std::string(indicatorWidth, ' ');
-        }
+        hasAttachment = header.GetHasAttachments();
       }
 
       bool isSelected = (folderSelectedUids.find(uid) != folderSelectedUids.end());
-      std::string selectFlag = (isSelected && !hasAttrsSelected) ? "X" : " ";
-
-      shortDate = Util::TrimPadString(shortDate, 10);
-      shortFrom = Util::ToString(Util::TrimPadWString(Util::ToWString(shortFrom), 20));
-      std::string headerLeft = selectFlag + unreadFlag + " " + attachFlag + "  " + shortDate + "  " + shortFrom + "  ";
-      int subjectWidth = m_ScreenWidth - Util::WStringWidth(Util::ToWString(headerLeft)) - 1;
-      subject = Util::ToString(Util::TrimPadWString(Util::ToWString(subject), subjectWidth));
-      std::string header = headerLeft + subject + " ";
-
       bool isCurrent = (i == m_MessageListCurrentIndex[m_CurrentFolder]);
 
-      if (isCurrent)
+      // Beautiful message line construction
+      std::string messageIcons;
+      std::string messageText;
+      
+      // Status icon (read/unread)
+      if (isUnread)
       {
-        wattron(m_MainWin, m_AttrsHighlightedText);
+        messageIcons += GetUnicodeSymbol(SYMBOL_UNREAD);
       }
-
+      else
+      {
+        messageIcons += GetUnicodeSymbol(SYMBOL_READ);
+      }
+      
+      // Selection indicator
       if (isSelected)
       {
-        wattron(m_MainWin, isCurrent ? m_AttrsSelectedHighlighted : m_AttrsSelectedItem);
+        messageIcons += " " + GetUnicodeSymbol(SYMBOL_SELECTED);
       }
-
-      std::wstring wheader = Util::TrimPadWString(Util::ToWString(header), m_ScreenWidth - 1) + L" ";;
-      mvwaddnwstr(m_MainWin, i - idxOffs, 0, wheader.c_str(), std::min((int)wheader.size(), m_ScreenWidth));
-
-      if (isSelected)
+      else
       {
-        wattroff(m_MainWin, isCurrent ? m_AttrsSelectedHighlighted : m_AttrsSelectedItem);
+        messageIcons += "  ";
       }
-
+      
+      // Attachment icon
+      if (hasAttachment)
+      {
+        messageIcons += " " + GetUnicodeSymbol(SYMBOL_ATTACHMENT);
+      }
+      else
+      {
+        messageIcons += "  ";
+      }
+      
+      // Format and color the message line
+      shortDate = Util::TrimPadString(shortDate, 10);
+      shortFrom = Util::ToString(Util::TrimPadWString(Util::ToWString(shortFrom), 18));
+      
+      // Calculate available width for subject
+      int iconsWidth = Util::WStringWidth(Util::ToWString(messageIcons));
+      int dateWidth = 10;
+      int fromWidth = 18;
+      int padding = 6; // spaces between fields
+      int subjectWidth = m_ScreenWidth - iconsWidth - dateWidth - fromWidth - padding - 2;
+      
+      subject = Util::ToString(Util::TrimPadWString(Util::ToWString(subject), subjectWidth));
+      
+      // Apply beautiful colors
       if (isCurrent)
       {
-        wattroff(m_MainWin, m_AttrsHighlightedText);
+        wattron(m_MainWin, m_BeautifulColors[COLOR_ACTIVE_ITEM]);
+      }
+      else if (isSelected)
+      {
+        wattron(m_MainWin, m_BeautifulColors[COLOR_SELECTED_ITEM]);
+      }
+      else if (isUnread)
+      {
+        wattron(m_MainWin, m_BeautifulColors[COLOR_UNREAD_ITEM]);
+      }
+      else
+      {
+        wattron(m_MainWin, m_BeautifulColors[COLOR_NORMAL_ITEM]);
+      }
+
+      // Draw the message line with beautiful formatting
+      int yPos = i - idxOffs;
+      int xPos = 0;
+      
+      // Icons section
+      mvwaddstr(m_MainWin, yPos, xPos, messageIcons.c_str());
+      xPos += iconsWidth + 1;
+      
+      // Date section with subtle color
+      wattron(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
+      mvwaddstr(m_MainWin, yPos, xPos, shortDate.c_str());
+      wattroff(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
+      xPos += dateWidth + 1;
+      
+      // From section with sender color
+      wattron(m_MainWin, m_BeautifulColors[COLOR_SENDER_NAME]);
+      mvwaddstr(m_MainWin, yPos, xPos, shortFrom.c_str());
+      wattroff(m_MainWin, m_BeautifulColors[COLOR_SENDER_NAME]);
+      xPos += fromWidth + 2;
+      
+      // Subject section
+      wattron(m_MainWin, isCurrent ? m_BeautifulColors[COLOR_ACTIVE_SUBJECT] : 
+                         isUnread ? m_BeautifulColors[COLOR_UNREAD_SUBJECT] : 
+                         m_BeautifulColors[COLOR_SUBJECT_TEXT]);
+      mvwaddstr(m_MainWin, yPos, xPos, subject.c_str());
+      wattroff(m_MainWin, isCurrent ? m_BeautifulColors[COLOR_ACTIVE_SUBJECT] : 
+                          isUnread ? m_BeautifulColors[COLOR_UNREAD_SUBJECT] : 
+                          m_BeautifulColors[COLOR_SUBJECT_TEXT]);
+      
+      // Turn off main coloring
+      if (isCurrent)
+      {
+        wattroff(m_MainWin, m_BeautifulColors[COLOR_ACTIVE_ITEM]);
+      }
+      else if (isSelected)
+      {
+        wattroff(m_MainWin, m_BeautifulColors[COLOR_SELECTED_ITEM]);
+      }
+      else if (isUnread)
+      {
+        wattroff(m_MainWin, m_BeautifulColors[COLOR_UNREAD_ITEM]);
+      }
+      else
+      {
+        wattroff(m_MainWin, m_BeautifulColors[COLOR_NORMAL_ITEM]);
       }
 
       if (i == m_MessageListCurrentIndex[m_CurrentFolder])
@@ -1402,6 +1529,10 @@ void Ui::DrawMessageList()
       }
     }
   }
+
+  // Beautiful status line for message list
+  std::string folderInfo = "Folder: " + m_CurrentFolder;
+  DrawBeautifulStatusLine(folderInfo, "folder");
 
   wrefresh(m_MainWin);
 }
@@ -1716,41 +1847,121 @@ void Ui::DrawMessage()
 
       m_MessageViewLineOffset = Util::Bound(0, m_MessageViewLineOffset,
                                             countLines - m_MainWinHeight);
+      
+      // Beautiful message rendering with enhanced colors and formatting
       for (int i = 0; ((i < m_MainWinHeight) && (i < countLines)); ++i)
       {
         const std::wstring& wdispStr = wlines.at(i + m_MessageViewLineOffset);
         const std::string& dispStr = Util::ToString(wdispStr);
-        const bool isQuote = (dispStr.rfind(">", 0) == 0) &&
-          ((i + m_MessageViewLineOffset) > m_MessageViewHeaderLineCount);
+        const int lineIndex = i + m_MessageViewLineOffset;
+        
+        // Determine line type for beautiful coloring
+        const bool isHeader = (lineIndex <= m_MessageViewHeaderLineCount);
+        const bool isQuote = (dispStr.rfind(">", 0) == 0) && !isHeader;
+        const bool isURL = (dispStr.find("http://") != std::string::npos || 
+                           dispStr.find("https://") != std::string::npos ||
+                           dispStr.find("www.") != std::string::npos ||
+                           dispStr.find("@") != std::string::npos);
 
-        if (isQuote)
+        // Apply beautiful colors based on content type
+        if (isHeader)
         {
-          wattron(m_MainWin, m_AttrsQuotedText);
+          if (dispStr.find("From:") == 0 || dispStr.find("To:") == 0 || 
+              dispStr.find("Cc:") == 0 || dispStr.find("Bcc:") == 0 ||
+              dispStr.find("Reply-To:") == 0)
+          {
+            wattron(m_MainWin, m_BeautifulColors[COLOR_HEADER_NAME]);
+          }
+          else if (dispStr.find("Subject:") == 0)
+          {
+            wattron(m_MainWin, m_BeautifulColors[COLOR_SUBJECT_TEXT]);
+          }
+          else if (dispStr.find("Date:") == 0)
+          {
+            wattron(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
+          }
+          else if (dispStr.find("Attachments:") == 0)
+          {
+            wattron(m_MainWin, m_BeautifulColors[COLOR_ATTACHMENT_INFO]);
+          }
+          else
+          {
+            wattron(m_MainWin, m_BeautifulColors[COLOR_HEADER_VALUE]);
+          }
+        }
+        else if (isQuote)
+        {
+          wattron(m_MainWin, m_BeautifulColors[COLOR_QUOTED_TEXT]);
+        }
+        else if (isURL)
+        {
+          wattron(m_MainWin, m_BeautifulColors[COLOR_URL_LINK]);
+        }
+        else
+        {
+          wattron(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_TEXT]);
         }
 
-        if (!m_MessageFindQuery.empty() && (m_MessageFindMatchLine == (i + m_MessageViewLineOffset)))
+        // Handle search highlighting with beautiful colors
+        if (!m_MessageFindQuery.empty() && (m_MessageFindMatchLine == lineIndex))
         {
-          // search match
           const std::wstring wquery = Util::ToWString(m_MessageFindQuery);
           std::wstring beforeMatch = wdispStr.substr(0, m_MessageFindMatchPos);
           std::wstring match = wdispStr.substr(m_MessageFindMatchPos, wquery.size());
           std::wstring afterMatch = wdispStr.substr(m_MessageFindMatchPos + wquery.size());
 
           mvwaddnwstr(m_MainWin, i, 0, beforeMatch.c_str(), beforeMatch.size());
-          wattron(m_MainWin, m_AttrsHighlightedText);
+          
+          // Beautiful search highlight
+          wattron(m_MainWin, m_BeautifulColors[COLOR_SEARCH_MATCH]);
           mvwaddnwstr(m_MainWin, i, beforeMatch.size(), match.c_str(), match.size());
-          wattroff(m_MainWin, m_AttrsHighlightedText);
+          wattroff(m_MainWin, m_BeautifulColors[COLOR_SEARCH_MATCH]);
+          
           mvwaddnwstr(m_MainWin, i, beforeMatch.size() + match.size(), afterMatch.c_str(), afterMatch.size());
         }
         else
         {
-          // normal
+          // Normal beautiful rendering
           mvwaddnwstr(m_MainWin, i, 0, wdispStr.c_str(), wdispStr.size());
         }
 
-        if (isQuote)
+        // Turn off colors
+        if (isHeader)
         {
-          wattroff(m_MainWin, m_AttrsQuotedText);
+          if (dispStr.find("From:") == 0 || dispStr.find("To:") == 0 || 
+              dispStr.find("Cc:") == 0 || dispStr.find("Bcc:") == 0 ||
+              dispStr.find("Reply-To:") == 0)
+          {
+            wattroff(m_MainWin, m_BeautifulColors[COLOR_HEADER_NAME]);
+          }
+          else if (dispStr.find("Subject:") == 0)
+          {
+            wattroff(m_MainWin, m_BeautifulColors[COLOR_SUBJECT_TEXT]);
+          }
+          else if (dispStr.find("Date:") == 0)
+          {
+            wattroff(m_MainWin, m_BeautifulColors[COLOR_DATE_TIME]);
+          }
+          else if (dispStr.find("Attachments:") == 0)
+          {
+            wattroff(m_MainWin, m_BeautifulColors[COLOR_ATTACHMENT_INFO]);
+          }
+          else
+          {
+            wattroff(m_MainWin, m_BeautifulColors[COLOR_HEADER_VALUE]);
+          }
+        }
+        else if (isQuote)
+        {
+          wattroff(m_MainWin, m_BeautifulColors[COLOR_QUOTED_TEXT]);
+        }
+        else if (isURL)
+        {
+          wattroff(m_MainWin, m_BeautifulColors[COLOR_URL_LINK]);
+        }
+        else
+        {
+          wattroff(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_TEXT]);
         }
       }
 
@@ -1818,6 +2029,10 @@ void Ui::DrawMessage()
   {
     MarkSeen();
   }
+
+  // Beautiful status line for message view
+  std::string messageInfo = "Message View - Use arrow keys to scroll";
+  DrawBeautifulStatusLine(messageInfo, "message");
 
   wrefresh(m_MainWin);
 }
@@ -7215,6 +7430,234 @@ std::vector<MessageDisplayInfo> Ui::ConvertToMessageDisplayInfo(const std::strin
   }
   
   return messages;
+}
+
+// Beautiful UI Enhancement Methods
+void Ui::InitBeautifulColors()
+{
+  if (!m_ColorsEnabled) return;
+  
+  // Initialize beautiful color pairs with new enum names
+  init_pair(COLOR_BEAUTIFUL_HEADER, COLOR_WHITE, COLOR_BLUE);
+  init_pair(COLOR_ACTIVE_ITEM, COLOR_WHITE, COLOR_BLUE);
+  init_pair(COLOR_SELECTED_ITEM, COLOR_BLACK, COLOR_CYAN);
+  init_pair(COLOR_UNREAD_ITEM, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(COLOR_NORMAL_ITEM, COLOR_WHITE, COLOR_BLACK);
+  init_pair(COLOR_FOLDER_ITEM, COLOR_BLUE, COLOR_BLACK);
+  init_pair(COLOR_DATE_TIME, COLOR_GREEN, COLOR_BLACK);
+  init_pair(COLOR_SENDER_NAME, COLOR_WHITE, COLOR_BLACK);
+  init_pair(COLOR_SUBJECT_TEXT, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(COLOR_ACTIVE_SUBJECT, COLOR_WHITE, COLOR_BLUE);
+  init_pair(COLOR_UNREAD_SUBJECT, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(COLOR_HEADER_NAME, COLOR_CYAN, COLOR_BLACK);
+  init_pair(COLOR_HEADER_VALUE, COLOR_WHITE, COLOR_BLACK);
+  init_pair(COLOR_QUOTED_TEXT, COLOR_BLUE, COLOR_BLACK);
+  init_pair(COLOR_URL_LINK, COLOR_CYAN, COLOR_BLACK);
+  init_pair(COLOR_MESSAGE_TEXT, COLOR_WHITE, COLOR_BLACK);
+  init_pair(COLOR_SEARCH_MATCH, COLOR_BLACK, COLOR_YELLOW);
+  init_pair(COLOR_ATTACHMENT_INFO, COLOR_MAGENTA, COLOR_BLACK);
+  
+  // Store color pairs in array
+  m_BeautifulColors[COLOR_BEAUTIFUL_HEADER] = COLOR_PAIR(COLOR_BEAUTIFUL_HEADER);
+  m_BeautifulColors[COLOR_ACTIVE_ITEM] = COLOR_PAIR(COLOR_ACTIVE_ITEM);
+  m_BeautifulColors[COLOR_SELECTED_ITEM] = COLOR_PAIR(COLOR_SELECTED_ITEM);
+  m_BeautifulColors[COLOR_UNREAD_ITEM] = COLOR_PAIR(COLOR_UNREAD_ITEM);
+  m_BeautifulColors[COLOR_NORMAL_ITEM] = COLOR_PAIR(COLOR_NORMAL_ITEM);
+  m_BeautifulColors[COLOR_FOLDER_ITEM] = COLOR_PAIR(COLOR_FOLDER_ITEM);
+  m_BeautifulColors[COLOR_DATE_TIME] = COLOR_PAIR(COLOR_DATE_TIME);
+  m_BeautifulColors[COLOR_SENDER_NAME] = COLOR_PAIR(COLOR_SENDER_NAME);
+  m_BeautifulColors[COLOR_SUBJECT_TEXT] = COLOR_PAIR(COLOR_SUBJECT_TEXT);
+  m_BeautifulColors[COLOR_ACTIVE_SUBJECT] = COLOR_PAIR(COLOR_ACTIVE_SUBJECT);
+  m_BeautifulColors[COLOR_UNREAD_SUBJECT] = COLOR_PAIR(COLOR_UNREAD_SUBJECT);
+  m_BeautifulColors[COLOR_HEADER_NAME] = COLOR_PAIR(COLOR_HEADER_NAME);
+  m_BeautifulColors[COLOR_HEADER_VALUE] = COLOR_PAIR(COLOR_HEADER_VALUE);
+  m_BeautifulColors[COLOR_QUOTED_TEXT] = COLOR_PAIR(COLOR_QUOTED_TEXT);
+  m_BeautifulColors[COLOR_URL_LINK] = COLOR_PAIR(COLOR_URL_LINK);
+  m_BeautifulColors[COLOR_MESSAGE_TEXT] = COLOR_PAIR(COLOR_MESSAGE_TEXT);
+  m_BeautifulColors[COLOR_SEARCH_MATCH] = COLOR_PAIR(COLOR_SEARCH_MATCH);
+  m_BeautifulColors[COLOR_ATTACHMENT_INFO] = COLOR_PAIR(COLOR_ATTACHMENT_INFO);
+}
+
+std::string Ui::GetUnicodeSymbol(UISymbols symbol)
+{
+  switch (symbol) {
+    case SYMBOL_UNREAD: return "●";
+    case SYMBOL_READ: return "○";
+    case SYMBOL_SELECTED: return "✓";
+    case SYMBOL_ATTACHMENT: return "📎";
+    case SYMBOL_IMPORTANT: return "⭐";
+    case SYMBOL_FOLDER: return "📁";
+    case SYMBOL_INBOX: return "📥";
+    case SYMBOL_SENT: return "📤";
+    case SYMBOL_DRAFTS: return "📝";
+    case SYMBOL_DRAFT: return "📝";
+    case SYMBOL_TRASH: return "🗑";
+    case SYMBOL_SPAM: return "⚠";
+    case SYMBOL_ARCHIVE: return "📦";
+    default: return " ";
+  }
+}
+
+void Ui::ApplyBeautifulColors(WINDOW* window, BeautifulColors colorType)
+{
+  if (!m_ColorsEnabled) return;
+  wattron(window, COLOR_PAIR(colorType));
+}
+
+void Ui::DrawBeautifulBorder(WINDOW* window, const std::string& title, bool isActive)
+{
+  if (!window) return;
+  
+  int height, width;
+  getmaxyx(window, height, width);
+  (void)height; // Suppress unused variable warning
+  
+  // Use beautiful colors for active/inactive borders
+  if (isActive) {
+    ApplyBeautifulColors(window, COLOR_BEAUTIFUL_HEADER);
+  }
+  
+  // Draw a beautiful border with Unicode characters
+  box(window, 0, 0);
+  
+  if (!title.empty()) {
+    std::string decoratedTitle = "═══ " + title + " ═══";
+    int titleStart = (width - decoratedTitle.length()) / 2;
+    if (titleStart > 0 && titleStart + decoratedTitle.length() < static_cast<size_t>(width)) {
+      mvwaddstr(window, 0, titleStart, decoratedTitle.c_str());
+    }
+  }
+  
+  if (isActive && m_ColorsEnabled) {
+    wattroff(window, COLOR_PAIR(COLOR_BEAUTIFUL_HEADER));
+  }
+}
+
+void Ui::DrawBeautifulTopBar()
+{
+  if (!m_TopWin) return;
+  
+  werase(m_TopWin);
+  ApplyBeautifulColors(m_TopWin, COLOR_BEAUTIFUL_HEADER);
+  
+  // Create a beautiful title with icons
+  std::string title = "✉ Falanet Terminal Email Client ✉";
+  int titleX = (m_ScreenWidth - title.length()) / 2;
+  if (titleX > 0) {
+    mvwaddstr(m_TopWin, 0, titleX, title.c_str());
+  }
+  
+  // Add status information
+  std::string statusInfo = GetStatusStr();
+  if (!statusInfo.empty()) {
+    int statusX = m_ScreenWidth - statusInfo.length() - 2;
+    if (statusX > 0) {
+      mvwaddstr(m_TopWin, 0, statusX, statusInfo.c_str());
+    }
+  }
+  
+  if (m_ColorsEnabled) {
+    wattroff(m_TopWin, COLOR_PAIR(COLOR_BEAUTIFUL_HEADER));
+  }
+  
+  wrefresh(m_TopWin);
+}
+
+void Ui::DrawBeautifulStatusLine(const std::string& status, const std::string& type)
+{
+  if (!m_DialogWin) return;
+  
+  werase(m_DialogWin);
+  
+  BeautifulColors colorType = COLOR_BEAUTIFUL_HEADER;
+  std::string icon = "ℹ ";
+  
+  if (type == "error") {
+    colorType = COLOR_SEARCH_MATCH; // Use search match color for errors
+    icon = "✗ ";
+  } else if (type == "warning") {
+    colorType = COLOR_ATTACHMENT_INFO; // Use attachment color for warnings
+    icon = "⚠ ";
+  } else if (type == "success") {
+    colorType = COLOR_DATE_TIME; // Use date color for success
+    icon = "✓ ";
+  }
+  
+  ApplyBeautifulColors(m_DialogWin, colorType);
+  
+  std::string fullMessage = icon + status;
+  mvwaddstr(m_DialogWin, 0, 1, fullMessage.c_str());
+  
+  if (m_ColorsEnabled) {
+    wattroff(m_DialogWin, COLOR_PAIR(colorType));
+  }
+  
+  wrefresh(m_DialogWin);
+}
+
+void Ui::DrawBeautifulProgressBar(int percentage, const std::string& operation)
+{
+  if (!m_DialogWin) return;
+  
+  int width = m_ScreenWidth - 4;
+  int filled = (width * percentage) / 100;
+  
+  werase(m_DialogWin);
+  ApplyBeautifulColors(m_DialogWin, COLOR_BEAUTIFUL_HEADER);
+  
+  // Draw progress bar with Unicode blocks
+  std::string progressBar = "[";
+  for (int i = 0; i < width; ++i) {
+    if (i < filled) {
+      progressBar += "█";
+    } else {
+      progressBar += "░";
+    }
+  }
+  progressBar += "] " + std::to_string(percentage) + "%";
+  
+  if (!operation.empty()) {
+    progressBar += " " + operation;
+  }
+  
+  mvwaddstr(m_DialogWin, 0, 1, progressBar.c_str());
+  
+  if (m_ColorsEnabled) {
+    wattroff(m_DialogWin, COLOR_PAIR(COLOR_BEAUTIFUL_HEADER));
+  }
+  
+  wrefresh(m_DialogWin);
+}
+
+std::string Ui::FormatBeautifulSize(size_t bytes)
+{
+  const char* suffixes[] = {"B", "KB", "MB", "GB", "TB"};
+  double size = static_cast<double>(bytes);
+  int i = 0;
+  
+  while (size >= 1024 && i < 4) {
+    size /= 1024;
+    i++;
+  }
+  
+  std::ostringstream ss;
+  if (i == 0) {
+    ss << static_cast<int>(size) << " " << suffixes[i];
+  } else {
+    ss << std::fixed << std::setprecision(1) << size << " " << suffixes[i];
+  }
+  return ss.str();
+}
+
+std::string Ui::FormatBeautifulDate(const std::string& timestamp)
+{
+  if (timestamp.length() >= 16) {
+    // Format: "MM/DD HH:MM" for beautiful display
+    return timestamp.substr(5, 5) + " " + timestamp.substr(11, 5);
+  } else if (timestamp.length() >= 10) {
+    return timestamp.substr(5, 5); // Just MM/DD
+  }
+  return timestamp;
 }
 
 // Enhanced UI utility methods
