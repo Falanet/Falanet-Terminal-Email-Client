@@ -621,21 +621,43 @@ void Ui::DrawSearchDialog()
 
 void Ui::DrawDefaultDialog()
 {
-  werase(m_DialogWin);
+  // Don't erase if we have a beautiful status line that should persist
+  bool hasBeautifulStatusLine = false;
+  std::chrono::time_point<std::chrono::system_clock> nowTime =
+    std::chrono::system_clock::now();
+  std::chrono::duration<double> statusElapsed = nowTime - m_BeautifulStatusTime;
+  
+  // Check if we have a recent beautiful status line (within 30 seconds)
+  if ((statusElapsed.count() < 30.0f) && !m_BeautifulStatusMessage.empty())
+  {
+    hasBeautifulStatusLine = true;
+  }
 
+  // Only show temporary dialog messages if no beautiful status line is active
+  bool showDialogMessage = false;
   {
     std::lock_guard<std::mutex> lock(m_Mutex);
-    std::chrono::time_point<std::chrono::system_clock> nowTime =
-      std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed = nowTime - m_DialogMessageTime;
     if ((elapsed.count() < 0.5f) && !m_DialogMessage.empty())
     {
-      int x = std::max((m_ScreenWidth - (int)m_DialogMessage.size() - 1) / 2, 0);
-      const std::string& dispStr = m_DialogMessage;
-      wattron(m_DialogWin, m_AttrsDialog);
-      mvwprintw(m_DialogWin, 0, x, " %s ", dispStr.c_str());
-      wattroff(m_DialogWin, m_AttrsDialog);
+      showDialogMessage = true;
+      hasBeautifulStatusLine = false; // Dialog message takes priority
     }
+  }
+
+  if (!hasBeautifulStatusLine)
+  {
+    werase(m_DialogWin);
+  }
+
+  if (showDialogMessage)
+  {
+    std::lock_guard<std::mutex> lock(m_Mutex);
+    int x = std::max((m_ScreenWidth - (int)m_DialogMessage.size() - 1) / 2, 0);
+    const std::string& dispStr = m_DialogMessage;
+    wattron(m_DialogWin, m_AttrsDialog);
+    mvwprintw(m_DialogWin, 0, x, " %s ", dispStr.c_str());
+    wattroff(m_DialogWin, m_AttrsDialog);
   }
 
   wrefresh(m_DialogWin);
@@ -7538,8 +7560,13 @@ void Ui::DrawBeautifulStatusLine(const std::string& status, const std::string& t
 {
   if (!m_DialogWin) return;
   
+  // Store the beautiful status line information
+  m_BeautifulStatusMessage = status;
+  m_BeautifulStatusTime = std::chrono::system_clock::now();
+  
   werase(m_DialogWin);
   
+  // Use the same color scheme as the top bar for consistency
   BeautifulColors colorType = COLOR_BEAUTIFUL_HEADER;
   std::string icon = "ℹ ";
   
@@ -7554,19 +7581,21 @@ void Ui::DrawBeautifulStatusLine(const std::string& status, const std::string& t
     icon = "✓ ";
   }
   
-  ApplyBeautifulColors(m_DialogWin, colorType);
-  
-  // Add bold attribute for high contrast
+  // Use same styling as top bar - apply beautiful colors but without bold
   if (m_ColorsEnabled) {
-    wattron(m_DialogWin, A_BOLD);
+    ApplyBeautifulColors(m_DialogWin, colorType);
+  } else {
+    // For non-color terminals, use the same attributes as top bar
+    wattron(m_DialogWin, m_AttrsTopBar);
   }
   
   std::string fullMessage = icon + status;
   mvwaddstr(m_DialogWin, 0, 1, fullMessage.c_str());
   
   if (m_ColorsEnabled) {
-    wattroff(m_DialogWin, A_BOLD);
     wattroff(m_DialogWin, COLOR_PAIR(colorType));
+  } else {
+    wattroff(m_DialogWin, m_AttrsTopBar);
   }
   
   wrefresh(m_DialogWin);

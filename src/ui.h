@@ -413,6 +413,9 @@ private:
   std::string m_DialogMessage;
   std::chrono::time_point<std::chrono::system_clock> m_DialogMessageTime;
 
+  std::string m_BeautifulStatusMessage;
+  std::chrono::time_point<std::chrono::system_clock> m_BeautifulStatusTime;
+
   std::map<std::string, int32_t> m_MessageListCurrentIndex;
   std::map<std::string, int32_t> m_MessageListCurrentUid;
   std::map<std::string, bool> m_MessageListUidSet;
