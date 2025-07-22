@@ -56,6 +56,8 @@ add_executable(falanet
   src/flag.h
   src/header.cpp
   src/header.h
+  src/html_parser.cpp
+  src/html_parser.h
   src/imap.cpp
   src/imap.h
   src/imapcache.cpp

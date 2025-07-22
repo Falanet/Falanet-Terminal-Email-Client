@@ -16,6 +16,27 @@
 #include "config.h"
 #include "imapmanager.h"
 #include "smtpmanager.h"
+#include "html_parser.h"
+
+struct MessageDisplayInfo
+{
+  std::string subject;
+  std::string sender;
+  std::string date;
+  std::string preview;
+  bool isUnread = false;
+  bool hasAttachments = false;
+  int priority = 0;
+  std::string folder;
+};
+
+struct ProgressInfo
+{
+  std::string operation;
+  double percentage = 0.0;
+  std::string status;
+  bool isActive = false;
+};
 
 class SleepDetect;
 
@@ -250,6 +271,33 @@ private:
 
   void OnWakeUp();
   void AutoMoveSelectFolder();
+  
+  // Enhanced UI helper functions  
+  std::vector<MessageDisplayInfo> ConvertToMessageDisplayInfo(const std::string& folder);
+  
+  // Enhanced UI rendering methods
+  void RenderEnhancedTopBar(const std::string& title, const std::string& status, bool showProgress = false);
+  void RenderEnhancedMessageList(const std::vector<MessageDisplayInfo>& messages, int selectedIndex);
+  void RenderEnhancedMessageView(const std::string& htmlContent, int scrollOffset = 0);
+  void RenderEnhancedBottomBar(const std::vector<std::string>& shortcuts);
+  void RenderProgressBar(const ProgressInfo& progress);
+  void RenderNotification(const std::string& message, const std::string& type = "info");
+  void RenderSidebar(const std::vector<std::string>& folders, int selectedFolder);
+  void RenderPreviewPane(const std::string& content);
+  void RenderSearchResults(const std::vector<MessageDisplayInfo>& results, const std::string& query);
+  void RenderComposeView(const std::string& to, const std::string& subject, const std::string& body);
+  
+  // Visual effects methods
+  void DrawBorder(WINDOW* window, const std::string& title = "", bool isActive = false);
+  void DrawSeparator(WINDOW* window, int y, int width, bool horizontal = true);
+  void DrawIcon(WINDOW* window, int y, int x, const std::string& icon, int colorPair = -1);
+  void DrawProgressIndicator(WINDOW* window, int y, int x, double percentage);
+  
+  // Utility methods
+  std::string TruncateWithEllipsis(const std::string& text, int maxLength);
+  std::string FormatFileSize(size_t bytes);
+  std::string FormatTimestamp(const std::string& timestamp);
+  std::string WrapTextToWidth(const std::string& text, int width);
 
 private:
   std::shared_ptr<ImapManager> m_ImapManager;
@@ -535,6 +583,7 @@ private:
   bool m_AllSelected = false;
 
   std::unique_ptr<SleepDetect> m_SleepDetect;
+  std::unique_ptr<HtmlParser> m_HtmlParser;
 
 private:
   static bool s_Running;

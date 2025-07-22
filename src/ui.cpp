@@ -11,8 +11,10 @@
 #include <climits>
 #include <cstdint>
 #include <sstream>
+#include <iomanip>
 
 #include "addressbook.h"
+#include "html_parser.h"
 #include "flag.h"
 #include "loghelp.h"
 #include "maphelp.h"
@@ -372,6 +374,9 @@ void Ui::Init()
   SetRunning(true);
 
   m_SleepDetect.reset(new SleepDetect(std::bind(&Ui::OnWakeUp, this), 10));
+  
+  // Initialize HTML parser
+  m_HtmlParser.reset(new HtmlParser());
 }
 
 void Ui::Cleanup()
@@ -432,6 +437,11 @@ void Ui::InitWindows()
   }
 
   leaveok(m_MainWin, true);
+  
+  // Initialize HTML parser with screen dimensions
+  if (m_HtmlParser) {
+    m_HtmlParser->SetTerminalWidth(m_ScreenWidth);
+  }
 }
 
 void Ui::CleanupWindows()
@@ -6614,7 +6624,24 @@ std::string Ui::GetBodyText(Body& p_Body)
       m_ImapManager->AsyncAction(imapAction);
     }
   }
-  return m_Plaintext ? p_Body.GetTextPlain() : p_Body.GetTextHtml();
+  
+  std::string bodyText = m_Plaintext ? p_Body.GetTextPlain() : p_Body.GetTextHtml();
+  
+  // Use HTML parser for better rendering if available and not in plain text mode
+  if (m_HtmlParser && !m_Plaintext && !p_Body.GetTextHtml().empty()) {
+    auto formattedContent = m_HtmlParser->ParseHtmlToTerminal(p_Body.GetTextHtml());
+    // Convert formatted content back to plain text for now
+    // This could be enhanced to preserve formatting
+    std::string formattedText;
+    for (const auto& format : formattedContent) {
+      formattedText += format.text;
+    }
+    if (!formattedText.empty()) {
+      bodyText = formattedText;
+    }
+  }
+  
+  return bodyText;
 }
 
 void Ui::FilePickerOrStateFileList()
@@ -7137,4 +7164,116 @@ void Ui::AutoMoveSelectFolder()
   m_FolderListFilterStr.clear();
   m_FolderListCurrentFolder = !foundFolder.empty() ? foundFolder : folder;
   m_FolderListCurrentIndex = INT_MAX;
+}
+
+// Enhanced UI helper functions
+std::vector<MessageDisplayInfo> Ui::ConvertToMessageDisplayInfo(const std::string& folder)
+{
+  std::vector<MessageDisplayInfo> messages;
+  
+  std::lock_guard<std::mutex> lock(m_Mutex);
+  const std::map<std::string, uint32_t>& displayUids = GetDisplayUids(folder);
+  const std::map<uint32_t, Header>& headers = m_Headers[folder];
+  const std::map<uint32_t, uint32_t>& flags = m_Flags[folder];
+  const std::string& currentDate = Header::GetCurrentDate();
+  
+  for (const auto& item : displayUids) {
+    uint32_t uid = item.second;
+    MessageDisplayInfo msgInfo;
+    
+    auto headerIt = headers.find(uid);
+    if (headerIt != headers.end()) {
+      const Header& header = headerIt->second;
+      msgInfo.subject = header.GetSubject();
+      msgInfo.sender = (folder == m_SentFolder) ? header.GetShortTo() : header.GetShortFrom();
+      msgInfo.date = header.GetDateOrTime(currentDate);
+      msgInfo.hasAttachments = header.GetHasAttachments();
+      
+      // Get a preview of the message
+      const std::map<uint32_t, Body>& bodys = m_Bodys[folder];
+      auto bodyIt = bodys.find(uid);
+      if (bodyIt != bodys.end()) {
+        const Body& body = bodyIt->second;
+        std::string bodyText = m_Plaintext ? body.GetTextPlain() : body.GetTextHtml();
+        // Extract first 100 characters as preview
+        msgInfo.preview = bodyText.substr(0, std::min(size_t(100), bodyText.length()));
+        // Remove newlines and extra whitespace
+        std::replace(msgInfo.preview.begin(), msgInfo.preview.end(), '\n', ' ');
+        std::replace(msgInfo.preview.begin(), msgInfo.preview.end(), '\r', ' ');
+      }
+    }
+    
+    auto flagIt = flags.find(uid);
+    if (flagIt != flags.end()) {
+      msgInfo.isUnread = !Flag::GetSeen(flagIt->second);
+    } else {
+      msgInfo.isUnread = true; // Default to unread if no flag info
+    }
+    
+    msgInfo.folder = folder;
+    messages.push_back(msgInfo);
+  }
+  
+  return messages;
+}
+
+// Enhanced UI utility methods
+std::string Ui::TruncateWithEllipsis(const std::string& text, int maxLength)
+{
+  if (static_cast<int>(text.length()) <= maxLength) {
+    return text;
+  }
+  return text.substr(0, maxLength - 3) + "...";
+}
+
+std::string Ui::FormatTimestamp(const std::string& timestamp)
+{
+  // Simple timestamp formatting - can be enhanced
+  if (timestamp.length() >= 10) {
+    return timestamp.substr(5, 5); // MM-DD format
+  }
+  return timestamp;
+}
+
+std::string Ui::WrapTextToWidth(const std::string& text, int width)
+{
+  if (width <= 0) return text;
+  
+  std::string result;
+  std::string currentLine;
+  std::istringstream words(text);
+  std::string word;
+  
+  while (words >> word) {
+    if (currentLine.empty()) {
+      currentLine = word;
+    } else if (static_cast<int>(currentLine.length() + word.length() + 1) <= width) {
+      currentLine += " " + word;
+    } else {
+      result += currentLine + "\n";
+      currentLine = word;
+    }
+  }
+  
+  if (!currentLine.empty()) {
+    result += currentLine;
+  }
+  
+  return result;
+}
+
+std::string Ui::FormatFileSize(size_t bytes)
+{
+  const char* suffixes[] = {"B", "KB", "MB", "GB"};
+  double size = static_cast<double>(bytes);
+  int i = 0;
+  
+  while (size >= 1024 && i < 3) {
+    size /= 1024;
+    i++;
+  }
+  
+  std::ostringstream ss;
+  ss << std::fixed << std::setprecision(1) << size << " " << suffixes[i];
+  return ss.str();
 }
