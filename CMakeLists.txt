@@ -256,7 +256,7 @@ endmacro()
 add_theme("default.conf")
 
 # Configuration template
-configure_file(main.conf ${CMAKE_CURRENT_BINARY_DIR}/share/falanet/main.conf COPYONLY)
+configure_file(etc/main.conf ${CMAKE_CURRENT_BINARY_DIR}/share/falanet/main.conf COPYONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/falanet/main.conf DESTINATION share/falanet)
 
 # Install main.conf to user's config directory if it doesn't exist
