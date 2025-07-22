@@ -7410,15 +7410,15 @@ void Ui::InitBeautifulColors()
   
   // Initialize beautiful color pairs with new enum names
   init_pair(COLOR_BEAUTIFUL_HEADER, COLOR_BLACK, COLOR_WHITE);  // High contrast: black text on white background
-  init_pair(COLOR_ACTIVE_ITEM, COLOR_WHITE, COLOR_BLUE);
-  init_pair(COLOR_SELECTED_ITEM, COLOR_BLACK, COLOR_CYAN);
+  init_pair(COLOR_ACTIVE_ITEM, COLOR_BLACK, COLOR_WHITE);       // High contrast: black text on white background
+  init_pair(COLOR_SELECTED_ITEM, COLOR_WHITE, COLOR_MAGENTA);   // High contrast: white text on magenta background
   init_pair(COLOR_UNREAD_ITEM, COLOR_YELLOW, COLOR_BLACK);
   init_pair(COLOR_NORMAL_ITEM, COLOR_WHITE, COLOR_BLACK);
   init_pair(COLOR_FOLDER_ITEM, COLOR_BLUE, COLOR_BLACK);
   init_pair(COLOR_DATE_TIME, COLOR_GREEN, COLOR_BLACK);
   init_pair(COLOR_SENDER_NAME, COLOR_WHITE, COLOR_BLACK);
   init_pair(COLOR_SUBJECT_TEXT, COLOR_YELLOW, COLOR_BLACK);
-  init_pair(COLOR_ACTIVE_SUBJECT, COLOR_WHITE, COLOR_BLUE);
+  init_pair(COLOR_ACTIVE_SUBJECT, COLOR_BLACK, COLOR_WHITE);    // High contrast: black text on white background
   init_pair(COLOR_UNREAD_SUBJECT, COLOR_YELLOW, COLOR_BLACK);
   init_pair(COLOR_HEADER_NAME, COLOR_CYAN, COLOR_BLACK);
   init_pair(COLOR_HEADER_VALUE, COLOR_WHITE, COLOR_BLACK);
