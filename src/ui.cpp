@@ -22,7 +22,19 @@
 #include "sethelp.h"
 #include "sleepdetect.h"
 #include "status.h"
+#include "util.h"
 #include "version.h"
+
+#ifdef __OpenBSD__
+// OpenBSD ncurses doesn't have mvwaddnwstr, so we create a compatibility function
+static inline int mvwaddnwstr_compat(WINDOW* win, int y, int x, const wchar_t* wstr, int n)
+{
+  std::wstring ws(wstr, n);
+  std::string s = Util::ToString(ws);
+  return mvwaddnstr(win, y, x, s.c_str(), s.size());
+}
+#define mvwaddnwstr mvwaddnwstr_compat
+#endif
 
 bool Ui::s_Running = false;
 
