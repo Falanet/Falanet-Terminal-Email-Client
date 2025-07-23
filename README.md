@@ -109,12 +109,32 @@ sudo pacman -Sy cmake make openssl ncurses xapian-core sqlite \
     cyrus-sasl curl expat zlib file
 ```
 
+**OpenBSD:**
+```bash
+doas pkg_add cmake sqlite3 xapian-core libmagic curl expat cyrus-sasl ossp-uuid
+```
+
 #### Build
 ```bash
 mkdir -p build && cd build
 cmake ..
 make -j$(nproc)
 sudo make install
+```
+
+**OpenBSD Build Notes:**
+
+```bash
+# First, create the UUID header symlink for ossp-uuid compatibility:
+doas mkdir -p /usr/local/include/uuid
+doas ln -s /usr/local/include/ossp/uuid.h /usr/local/include/uuid/uuid.h
+
+# Then build with specific library paths:
+cmake .. \
+  -DCURSES_INCLUDE_PATH=/usr/include \
+  -DCURSES_LIBRARY=/usr/lib/libcurses.so \
+  -DUUID_INCLUDE_DIR=/usr/local/include \
+  -DUUID_LIBRARY=/usr/local/lib/libuuid.so
 ```
 
 </details>

@@ -125,6 +125,11 @@ if(FALACLIENT_INSTALL_DEPS)
     else()
       message(FATAL_ERROR "Neither Homebrew nor MacPorts found on macOS")
     endif()
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+    add_custom_target(install_deps
+      COMMAND doas pkg_add cmake openssl ncurses sqlite3 xapian-core libmagic curl expat cyrus-sasl e2fsprogs-uuid
+      COMMENT "Installing dependencies for OpenBSD"
+    )
   else()
     message(FATAL_ERROR "Unsupported operating system: ${CMAKE_SYSTEM_NAME}")
   endif()

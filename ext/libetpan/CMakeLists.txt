@@ -270,6 +270,11 @@ add_dependencies(${LIBNAME} libetpan_headers)
 target_include_directories(${LIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include)
 target_include_directories(${LIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/libetpan)
 
+# OpenBSD specific include paths
+if (${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD")
+  target_include_directories(${LIBNAME} PRIVATE /usr/local/include)
+endif()
+
 # Headers - Standard
 check_include_add_define("arpa/inet.h" HAVE_ARPA_INET_H WARNING)
 check_include_add_define("ctype.h" HAVE_CTYPE_H WARNING)
@@ -377,6 +382,15 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   if(${HAVE_CFNETWORK})
     find_library(CFNETWORK_LIBRARY CFNetwork REQUIRED)
     target_link_libraries(${LIBNAME} PUBLIC "${CFNETWORK_LIBRARY}")
+  endif()
+# Linking (OpenBSD and other Unix systems that need iconv library)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD|FreeBSD|NetBSD")
+  find_library(ICONV_LIBRARY iconv PATHS /usr/local/lib)
+  if(ICONV_LIBRARY)
+    target_link_libraries(${LIBNAME} PUBLIC "${ICONV_LIBRARY}")
+    message(STATUS "Found iconv library: ${ICONV_LIBRARY}")
+  else()
+    message(WARNING "iconv library not found, build may fail")
   endif()
 endif()
 
