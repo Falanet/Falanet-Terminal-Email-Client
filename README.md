@@ -134,7 +134,7 @@ cmake .. \
   -DCURSES_INCLUDE_PATH=/usr/include \
   -DCURSES_LIBRARY=/usr/lib/libcurses.so \
   -DUUID_INCLUDE_DIR=/usr/local/include \
-  -DUUID_LIBRARY=/usr/local/lib/libuuid.so \
+  -DUUID_LIBRARY=/usr/local/lib/libossp-uuid.a \
   -DICONV_INCLUDE_DIR=/usr/local/include \
   -DICONV_LIBRARY=/usr/local/lib/libiconv.so
 ```
