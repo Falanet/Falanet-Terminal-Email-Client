@@ -979,21 +979,6 @@ static void KeyDump()
 
       int count = 0;
       wint_t keyOk = 0;
-#ifdef NCURSES_WIDECHAR
-      wint_t key = 0;
-      while (get_wch(&key) != ERR)
-      {
-        keyOk = key;
-        ++count;
-        printw("\\%o", key);
-
-        if ((key == 3) || (key == 'q'))
-        {
-          running = false;
-          break;
-        }
-      }
-#else
       int key = 0;
       while ((key = getch()) != ERR)
       {
@@ -1007,7 +992,6 @@ static void KeyDump()
           break;
         }
       }
-#endif
 
       if ((keyOk != 0) && (count == 1))
       {
