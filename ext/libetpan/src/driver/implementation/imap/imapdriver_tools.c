@@ -1588,9 +1588,8 @@ int imap_address_to_mailbox(struct mailimap_address * imap_addr,
       res = MAIL_ERROR_MEMORY;
       goto free_name;
     }
-    strlcpy(addr, imap_addr->ad_mailbox_name, mailbox_len + host_len + 2);
-    strlcat(addr, "@", mailbox_len + host_len + 2);
-    strlcat(addr, imap_addr->ad_host_name, mailbox_len + host_len + 2);
+    snprintf(addr, mailbox_len + host_len + 2, "%s@%s", 
+             imap_addr->ad_mailbox_name, imap_addr->ad_host_name);
   }
 
   mb = mailimf_mailbox_new(dsp_name, addr);
