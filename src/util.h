@@ -77,38 +77,63 @@ class ThreadRegister
 public:
   ThreadRegister(const std::string& p_Name)
   {
-    std::lock_guard<std::mutex> lock(m_Mutex);
-    m_Threads.insert({ pthread_self(), p_Name });
+#ifndef __OpenBSD__
+    std::lock_guard<std::mutex> lock(GetMutex());
+    GetThreads().insert({ pthread_self(), p_Name });
+#else
+    // Skip thread registration on OpenBSD to avoid static initialization issues
+    (void)p_Name;
+#endif
   }
 
   ~ThreadRegister()
   {
-    std::lock_guard<std::mutex> lock(m_Mutex);
-    m_Threads.erase(pthread_self());
+#ifndef __OpenBSD__
+    std::lock_guard<std::mutex> lock(GetMutex());
+    GetThreads().erase(pthread_self());
+#endif
   }
 
   static std::string GetName()
   {
-    std::lock_guard<std::mutex> lock(m_Mutex);
-    auto it = m_Threads.find(pthread_self());
-    return (it != m_Threads.end()) ? it->second : "";
+#ifndef __OpenBSD__
+    std::lock_guard<std::mutex> lock(GetMutex());
+    auto it = GetThreads().find(pthread_self());
+    return (it != GetThreads().end()) ? it->second : "";
+#else
+    return "";
+#endif
   }
 
   static void SignalThreads(int p_Sig)
   {
+#ifndef __OpenBSD__
     pthread_t self = pthread_self();
-    for (auto it = m_Threads.begin(); it != m_Threads.end(); ++it)
+    std::lock_guard<std::mutex> lock(GetMutex());
+    for (auto it = GetThreads().begin(); it != GetThreads().end(); ++it)
     {
       if (it->first != self)
       {
         pthread_kill(it->first, p_Sig);
       }
     }
+#else
+    (void)p_Sig;
+#endif
   }
 
 private:
-  static std::mutex m_Mutex;
-  static std::map<pthread_t, std::string> m_Threads;
+  static std::mutex& GetMutex()
+  {
+    static std::mutex mutex;
+    return mutex;
+  }
+  
+  static std::map<pthread_t, std::string>& GetThreads()
+  {
+    static std::map<pthread_t, std::string> threads;
+    return threads;
+  }
 };
 
 class Util

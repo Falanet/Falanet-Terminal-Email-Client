@@ -55,8 +55,7 @@
 #include "loghelp.h"
 #include "ui.h"
 
-std::mutex ThreadRegister::m_Mutex;
-std::map<pthread_t, std::string> ThreadRegister::m_Threads;
+// ThreadRegister now uses function-local static variables instead of class static members
 
 std::string Util::m_HtmlToTextConvertCmd;
 std::string Util::m_TextToHtmlConvertCmd;
