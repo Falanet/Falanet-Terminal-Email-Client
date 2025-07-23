@@ -111,7 +111,7 @@ sudo pacman -Sy cmake make openssl ncurses xapian-core sqlite \
 
 **OpenBSD:**
 ```bash
-doas pkg_add cmake sqlite3 xapian-core libmagic curl expat cyrus-sasl ossp-uuid
+doas pkg_add cmake sqlite3 xapian-core libmagic curl expat cyrus-sasl ossp-uuid libiconv
 ```
 
 #### Build
@@ -134,7 +134,9 @@ cmake .. \
   -DCURSES_INCLUDE_PATH=/usr/include \
   -DCURSES_LIBRARY=/usr/lib/libcurses.so \
   -DUUID_INCLUDE_DIR=/usr/local/include \
-  -DUUID_LIBRARY=/usr/local/lib/libuuid.so
+  -DUUID_LIBRARY=/usr/local/lib/libuuid.so \
+  -DICONV_INCLUDE_DIR=/usr/local/include \
+  -DICONV_LIBRARY=/usr/local/lib/libiconv.so
 ```
 
 </details>

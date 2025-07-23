@@ -127,7 +127,7 @@ if(FALACLIENT_INSTALL_DEPS)
     endif()
   elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
     add_custom_target(install_deps
-      COMMAND doas pkg_add cmake openssl ncurses sqlite3 xapian-core libmagic curl expat cyrus-sasl e2fsprogs-uuid
+      COMMAND doas pkg_add cmake sqlite3 xapian-core libmagic curl expat cyrus-sasl ossp-uuid libiconv
       COMMENT "Installing dependencies for OpenBSD"
     )
   else()
