@@ -20,7 +20,18 @@
 #define KEY_SPACE 32
 #define KEY_DELETE 127
 
+#include "sethelp.h"
+
+#ifndef LOGHELP_H
+#define LOGHELP_H
+
+// Logging macros
+#ifdef __OpenBSD__
+// Disable thread registration on OpenBSD to avoid potential threading issues
+#define THREAD_REGISTER() do { } while(0)
+#else
 #define THREAD_REGISTER() ThreadRegister threadRegister(__PRETTY_FUNCTION__)
+#endif
 #define UNUSED(x) Util::Unused(x)
 
 struct mailimap_date_time;

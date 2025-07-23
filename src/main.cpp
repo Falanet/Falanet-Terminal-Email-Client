@@ -146,18 +146,31 @@ int main(int argc, char* argv[])
   const std::string& logPath = Util::GetApplicationDir() + std::string("log.txt");
   Log::SetPath(logPath);
 
-  THREAD_REGISTER();
-  Util::InitAppSignalHandlers();
+  try 
+  {
+    THREAD_REGISTER();
+    Util::InitAppSignalHandlers();
 
-  const std::string appVersion = Version::GetAppName(true /*p_WithVersion*/);
-  LOG_INFO("%s", appVersion.c_str());
-  std::string osArch = Util::GetOsArch();
-  LOG_INFO("%s", osArch.c_str());
-  std::string compiler = Util::GetCompiler();
-  LOG_INFO("%s", compiler.c_str());
+    const std::string appVersion = Version::GetAppName(true /*p_WithVersion*/);
+    LOG_INFO("%s", appVersion.c_str());
+    std::string osArch = Util::GetOsArch();
+    LOG_INFO("%s", osArch.c_str());
+    std::string compiler = Util::GetCompiler();
+    LOG_INFO("%s", compiler.c_str());
 
-  Util::InitTempDir();
-  CacheUtil::InitCacheDir();
+    Util::InitTempDir();
+    CacheUtil::InitCacheDir();
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << "Fatal error during initialization: " << e.what() << std::endl;
+    return 1;
+  }
+  catch (...)
+  {
+    std::cerr << "Fatal error during initialization: unknown exception" << std::endl;
+    return 1;
+  }
 
   const std::map<std::string, std::string> defaultMainConfig =
   {
