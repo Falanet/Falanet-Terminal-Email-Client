@@ -21,6 +21,7 @@
 
 #ifdef __OpenBSD__
 #include <uuid.h>
+#include <ctime>
 #else
 #include <uuid/uuid.h>
 #endif
@@ -716,15 +717,26 @@ std::string Smtp::RemoveBccHeader(const std::string& p_Data)
 std::string Smtp::GenerateMessageId() const
 {
 #ifdef __OpenBSD__
-  uuid_t* uuid;
+  uuid_t uuid;
+  uint32_t status;
   char* uuid_str;
   
-  uuid_create(&uuid);
-  uuid_to_string(uuid, &uuid_str, NULL);
-  std::string result = std::string(uuid_str) + "@" + Util::GetDomainName(m_Host);
+  uuid_create(&uuid, &status);
+  if (status != uuid_s_ok)
+  {
+    // Fallback to a simple timestamp-based ID if UUID creation fails
+    return std::to_string(time(NULL)) + "@" + Util::GetDomainName(m_Host);
+  }
   
+  uuid_to_string(&uuid, &uuid_str, &status);
+  if (status != uuid_s_ok)
+  {
+    // Fallback to a simple timestamp-based ID if UUID conversion fails
+    return std::to_string(time(NULL)) + "@" + Util::GetDomainName(m_Host);
+  }
+  
+  std::string result = std::string(uuid_str) + "@" + Util::GetDomainName(m_Host);
   free(uuid_str);
-  uuid_destroy(uuid);
   
   return result;
 #else
