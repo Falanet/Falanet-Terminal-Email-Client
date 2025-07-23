@@ -25,7 +25,12 @@
 #include <netdb.h>
 #include <termios.h>
 #include <unistd.h>
+#ifdef __OpenBSD__
+#include <cstdlib>
+#include <pwd.h>
+#else
 #include <wordexp.h>
+#endif
 
 #include <sys/resource.h>
 #include <sys/socket.h>
@@ -275,6 +280,85 @@ std::string Util::ExpandPath(const std::string& p_Path)
 
   if ((p_Path.at(0) != '~') && ((p_Path.at(0) != '$'))) return p_Path;
 
+#ifdef __OpenBSD__
+  std::string rv = p_Path;
+  
+  // Handle tilde expansion
+  if (p_Path.at(0) == '~')
+  {
+    if (p_Path.length() == 1 || p_Path.at(1) == '/')
+    {
+      // Replace ~ with home directory
+      const char* home = getenv("HOME");
+      if (home)
+      {
+        rv = std::string(home) + p_Path.substr(1);
+      }
+    }
+    else
+    {
+      // Handle ~username/ expansion
+      size_t slashPos = p_Path.find('/');
+      std::string username = p_Path.substr(1, (slashPos == std::string::npos) ? std::string::npos : slashPos - 1);
+      struct passwd* pw = getpwnam(username.c_str());
+      if (pw)
+      {
+        rv = std::string(pw->pw_dir);
+        if (slashPos != std::string::npos)
+        {
+          rv += p_Path.substr(slashPos);
+        }
+      }
+    }
+  }
+  // Handle basic environment variable expansion (simple $VAR or ${VAR})
+  else if (p_Path.at(0) == '$')
+  {
+    size_t pos = 1;
+    bool inBraces = false;
+    
+    if (pos < p_Path.length() && p_Path.at(pos) == '{')
+    {
+      inBraces = true;
+      pos++;
+    }
+    
+    size_t start = pos;
+    while (pos < p_Path.length())
+    {
+      char c = p_Path.at(pos);
+      if (inBraces && c == '}')
+      {
+        break;
+      }
+      else if (!inBraces && !isalnum(c) && c != '_')
+      {
+        break;
+      }
+      pos++;
+    }
+    
+    if (pos > start)
+    {
+      std::string varName = p_Path.substr(start, pos - start);
+      const char* varValue = getenv(varName.c_str());
+      if (varValue)
+      {
+        rv = std::string(varValue);
+        if (inBraces && pos < p_Path.length())
+        {
+          rv += p_Path.substr(pos + 1); // Skip the closing brace
+        }
+        else if (!inBraces && pos < p_Path.length())
+        {
+          rv += p_Path.substr(pos);
+        }
+      }
+    }
+  }
+  
+  return rv;
+#else
   wordexp_t exp;
   std::string rv;
   if ((wordexp(p_Path.c_str(), &exp, WRDE_NOCMD) == 0) && (exp.we_wordc > 0))
@@ -292,6 +376,7 @@ std::string Util::ExpandPath(const std::string& p_Path)
   }
 
   return rv;
+#endif
 }
 
 std::vector<std::string> Util::SplitPaths(const std::string& p_Str)
