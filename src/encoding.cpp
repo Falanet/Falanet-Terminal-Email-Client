@@ -3,7 +3,7 @@
 // Copyright (c) 2021-2023 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "encoding.h"
 

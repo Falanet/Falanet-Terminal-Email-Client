@@ -18,9 +18,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 else()
   message(STATUS "Using build type '${CMAKE_BUILD_TYPE}'.")
 endif()
-
-# Static linking - no runtime paths needed
-set(CMAKE_SKIP_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Options
 option(HAS_COREDUMP "Core Dump" ON)
@@ -136,7 +134,6 @@ find_package(Threads REQUIRED)
 
 # Find ncurses
 set(CURSES_NEED_NCURSES TRUE)
-set(CURSES_NEED_WIDE TRUE)
 find_package(Curses REQUIRED)
 
 # Find OpenSSL
@@ -210,6 +207,30 @@ if(FALACLIENT_BUILD_DOC)
   endif()
 endif()
 
+# libetpan configuration
+option(LIBETPAN_CUSTOM "Use custom libetpan" ON)
+message(STATUS "Custom libetpan: ${LIBETPAN_CUSTOM}")
+
+if(LIBETPAN_CUSTOM)
+  set(LIBETPAN_LIBNAME "etpan-falaclient")
+  message(STATUS "Libetpan custom lib name: ${LIBETPAN_LIBNAME}")
+  message(STATUS "Libetpan: static")
+  message(STATUS "Libetpan: skip install")
+  
+  # Add libetpan as subdirectory
+  add_subdirectory(ext/libetpan)
+  add_dependencies(falaclient etpan-falaclient)
+  target_compile_definitions(falaclient PRIVATE LIBETPAN_CUSTOM=1)
+  
+  set(LIBETPAN_LIBRARY etpan-falaclient)
+  set(LIBETPAN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/ext/libetpan/include")
+else()
+  find_library(LIBETPAN_LIBRARY NAMES etpan REQUIRED)
+  find_path(LIBETPAN_INCLUDE_DIR libetpan/libetpan.h REQUIRED)
+endif()
+
+message(STATUS "Found libetpan: ${LIBETPAN_LIBNAME}")
+
 # Application
 add_executable(falaclient
   ext/apathy/path.hpp
@@ -282,44 +303,11 @@ add_executable(falaclient
   src/version.h
 )
 
-# libetpan configuration
-option(LIBETPAN_CUSTOM "Use custom libetpan" ON)
-message(STATUS "Custom libetpan: ${LIBETPAN_CUSTOM}")
-
-if(LIBETPAN_CUSTOM)
-  set(LIBETPAN_LIBNAME "etpan-falaclient")
-  message(STATUS "Libetpan custom lib name: ${LIBETPAN_LIBNAME}")
-  message(STATUS "Libetpan: static")
-  message(STATUS "Libetpan: skip install")
-  
-  # Configure libetpan as static library and skip install
-  set(LIBETPAN_STATIC ON)
-  set(LIBETPAN_NOINSTALL ON)
-  
-  # Add libetpan as subdirectory
-  add_subdirectory(ext/libetpan)
-  add_dependencies(falaclient etpan-falaclient)
-  target_compile_definitions(falaclient PRIVATE LIBETPAN_CUSTOM=1)
-  
-  set(LIBETPAN_LIBRARY etpan-falaclient)
-  set(LIBETPAN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/ext/libetpan/include")
-  # Also include the build directory for generated headers
-  target_include_directories(falaclient PRIVATE "${CMAKE_BINARY_DIR}/ext/libetpan/include")
-else()
-  find_library(LIBETPAN_LIBRARY NAMES etpan REQUIRED)
-  find_path(LIBETPAN_INCLUDE_DIR libetpan/libetpan.h REQUIRED)
-endif()
-
-message(STATUS "Found libetpan: ${LIBETPAN_LIBNAME}")
-
 # Install target
 install(TARGETS falaclient DESTINATION bin)
 
 # Include directories
 target_include_directories(falaclient PRIVATE "ext")
-target_include_directories(falaclient PRIVATE "ext/sqlite_modern_cpp/hdr")
-target_include_directories(falaclient PRIVATE "ext/cyrus-imap/lib")
-target_include_directories(falaclient PRIVATE "ext/cereal/include")
 target_include_directories(falaclient PRIVATE ${LIBETPAN_INCLUDE_DIR} ${XAPIAN_INCLUDE_DIR}
   ${MAGIC_INCLUDE_DIR} ${UUID_INCLUDE_DIR} ${CURL_INCLUDE_DIR} ${EXPAT_INCLUDE_DIR}
   ${SASL_INCLUDE_DIR} ${Z_INCLUDE_DIR} ${SQLITE_INCLUDE_DIR})
@@ -399,7 +387,6 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/html2falaclient DESTINATION bin)
 
 # Install share files
 install(DIRECTORY themes/ DESTINATION share/falaclient/themes)
-install(FILES etc/main.conf DESTINATION share/falaclient)
 
 # Tests (placeholder)
 enable_testing()

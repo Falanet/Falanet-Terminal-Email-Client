@@ -3,7 +3,7 @@
 // Copyright (c) 2019-2021 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #pragma once
 

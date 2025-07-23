@@ -3,7 +3,7 @@
 // Copyright (c) 2021-2023 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "auth.h"
 
@@ -296,7 +296,7 @@ int Auth::PerformAction(const AuthAction p_AuthAction)
   static const std::string clientId = GetClientId();
   static const std::string clientSecret = GetClientSecret();
   static const std::string tokenStore = GetTokenStoreTempPath();
-  static const std::string scriptPath = Util::DirName(Util::GetSelfPath()) + "/oauth2falanet";
+  static const std::string scriptPath = Util::DirName(Util::GetSelfPath()) + "/oauth2falaclient";
 
   setenv("OAUTH2_TYPE", type.c_str(), 1);
   setenv("OAUTH2_CLIENT_ID", clientId.c_str(), 1);

@@ -1,6 +1,6 @@
 #ifndef LIBETPAN_CONFIG_H
 #define LIBETPAN_CONFIG_H
-#if WIN32
+#ifdef WIN32
 # define MMAP_UNAVAILABLE
 #endif
 #ifdef _MSC_VER

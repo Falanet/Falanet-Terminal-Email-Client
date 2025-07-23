@@ -3,7 +3,7 @@
 // Copyright (c) 2020-2023 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "sasl.h"
 
@@ -13,12 +13,12 @@
 
 #include "loghelp.h"
 
-// Ideally Cyrus SASL should not be a direct dependency of falanet (it's an
+// Ideally Cyrus SASL should not be a direct dependency of falaclient (it's an
 // indirect dependency through libetpan), however there's been quite a bit
 // of user-reported bugs with failure to authenticate SMTP due to missing
 // the LOGIN mechanism. With this file we add direct interfacing with SASL
 // to get a list of its installed mechanisms. The list retrieved and logged
-// at falanet startup.
+// at falaclient startup.
 
 // Hack to disable warning about macOS deprecation of SASL functions.
 #ifdef __APPLE__

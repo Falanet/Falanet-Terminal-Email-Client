@@ -1,4 +1,4 @@
-# Falanet Terminal Email Client
+# Falaclient
 
 A beautiful, fast, and feature-rich terminal-based email client designed specifically for the Falanet mail service with modern UI enhancements.
 
@@ -44,13 +44,36 @@ A beautiful, fast, and feature-rich terminal-based email client designed specifi
 
 ```bash
 # Clone the repository
-git clone https://github.com/Falanet/Falanet-Terminal-Email-Client.git
-cd Falanet-Terminal-Email-Client
+git clone https://github.com/Falanet/falaclient.git
+cd falaclient
 
-# Install dependencies and build (Linux/macOS)
-sudo ./make.sh deps
-sudo ./make.sh build
+# Build with CMake (one-step process)
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
 sudo make install
+```
+
+### Advanced Build Options
+
+```bash
+# Install system dependencies automatically
+cmake -DFALACLIENT_INSTALL_DEPS=ON ..
+
+# Debug build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+# Format source code
+cmake -DFALACLIENT_FORMAT_CODE=ON ..
+
+# Build documentation
+cmake -DFALACLIENT_BUILD_DOC=ON ..
+
+# Bump version
+cmake -DFALACLIENT_BUMP_VERSION=ON ..
+
+# Combined example
+cmake -DCMAKE_BUILD_TYPE=Debug -DFALACLIENT_INSTALL_DEPS=ON -DFALACLIENT_BUILD_DOC=ON ..
 ```
 
 ### Manual Build
@@ -100,11 +123,11 @@ sudo make install
 
 ### First Run Setup
 ```bash
-# Start Falanet
-falanet
+# Start Falaclient
+falaclient
 
-# Configure your Falanet email account
-# Edit ~/.config/falanet/main.conf with your credentials:
+# Configure your falanet email account
+# Edit ~/.config/falaclient/main.conf with your credentials:
 # - address=your-username@falanet.org
 # - imap_host=mail.falanet.org
 # - smtp_host=mail.falanet.org
@@ -113,7 +136,7 @@ falanet
 
 ### Command Line Options
 ```bash
-falanet [OPTIONS]
+falaclient [OPTIONS]
 
 -d, --confdir <DIR>     Use different config directory
 -e, --verbose           Enable verbose logging  
@@ -129,7 +152,7 @@ falanet [OPTIONS]
 ## Customization
 
 ### Theme Configuration
-Edit `~/.config/falanet/themes/default.conf`:
+Edit `~/.config/falaclient/themes/default.conf`:
 
 ```ini
 # Beautiful Modern Theme
@@ -165,25 +188,29 @@ color_date_stamp_fg=green
 ## Configuration Files
 
 ```
-~/.config/falanet/
+~/.config/falaclient/
 ├── main.conf           # Main account settings
 ├── ui.conf            # UI customization
 └── themes/
     └── default.conf   # Color theme
 ```
 
-### Setting up your Falanet Account
+### Setting up your Falaclient Account
 
-Run falanet once to automatically generate the default config file:
+First, copy the default configuration file to your user config directory:
 
 ```bash
-falanet
+# Create config directory if it doesn't exist
+mkdir -p ~/.config/falaclient
+
+# Copy the default config file
+cp /usr/local/share/falaclient/main.conf ~/.config/falaclient/main.conf
 ```
 
-Then open the config file `~/.config/falanet/main.conf` in your favorite text editor and configure your Falanet account:
+Then open the config file `~/.config/falaclient/main.conf` in your favorite text editor and configure your Falaclient account:
 
 ```ini
-# Falanet Email Configuration
+# Falaclient Email Configuration
 address=your-username@falanet.org
 drafts=Drafts
 imap_host=mail.falanet.org
@@ -197,7 +224,7 @@ trash=Trash
 user=your-username@falanet.org
 ```
 
-Replace `your-username` with your actual Falanet username and `Your Full Name` with your display name.
+Replace `your-username` with your actual Falaclient username and `Your Full Name` with your display name.
 
 ## Enhanced Features
 
@@ -228,10 +255,10 @@ Replace `your-username` with your actual Falanet username and `Your Full Name` w
 ### Connection Issues
 ```bash
 # Test IMAP connection
-falanet --verbose
+falaclient --verbose
 
 # Check SSL/TLS settings
-# Edit ~/.config/falanet/main.conf
+# Edit ~/.config/falaclient/main.conf
 imap_server_port=993
 imap_server_ssl=true
 ```
@@ -239,10 +266,10 @@ imap_server_ssl=true
 ### Performance Issues
 ```bash
 # Clear cache
-rm -rf ~/.cache/falanet/
+rm -rf ~/.cache/falaclient/
 
 # Reduce prefetch level
-# Edit ~/.config/falanet/main.conf
+# Edit ~/.config/falaclient/main.conf
 prefetch_level=1
 ```
 
@@ -253,7 +280,7 @@ echo $TERM
 infocmp
 
 # Enable/disable colors
-# Edit ~/.config/falanet/ui.conf
+# Edit ~/.config/falaclient/ui.conf
 colors_enabled=true
 ```
 
@@ -268,14 +295,6 @@ We welcome contributions! Here's how you can help:
 3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
 4. **Push** to the branch (`git push origin feature/amazing-feature`)
 5. **Open** a Pull Request
-
-### Development Setup
-```bash
-git clone https://github.com/Falanet/Falanet-Terminal-Email-Client.git
-cd Falanet-Terminal-Email-Client
-./make.sh deps
-./make.sh build
-```
 
 ## System Requirements
 
@@ -304,25 +323,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Community feedback and contributions
 - Email protocol implementations using libetpan
 
-## Support
-
-- Bug Reports: [GitHub Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues)
-- Discussions: [GitHub Discussions](https://github.com/Falanet/Falanet-Terminal-Email-Client/discussions)
-- Email: Create an issue for support requests
-- Documentation: Check the [Wiki](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki)
-
 ---
 
 <div align="center">
 
 **Star this repository if you find it useful!**
-
-[Homepage](https://github.com/Falanet/Falanet-Terminal-Email-Client) • 
-[Documentation](https://github.com/Falanet/Falanet-Terminal-Email-Client/wiki) • 
-[Issues](https://github.com/Falanet/Falanet-Terminal-Email-Client/issues) • 
-[Releases](https://github.com/Falanet/Falanet-Terminal-Email-Client/releases)
-
-Made with love by the Falanet community
 
 </div>
 
@@ -378,7 +383,7 @@ The email navigator / viewer supports the following commands:
 Compose Editor
 ==============
 
-The built-in email compose editor in falanet supports the following:
+The built-in email compose editor in falaclient supports the following:
 
     Alt-Backspace  delete previous word
     Alt-Delete     delete next word
@@ -427,27 +432,27 @@ message list.
 Security
 ========
 
-falanet caches data locally to improve performance. Cached data can be encrypted
+falaclient caches data locally to improve performance. Cached data can be encrypted
 by setting by setting `cache_encrypt=1` in main.conf. Message databases are
 then encrypted using OpenSSL AES256-CBC with a key derived from a random salt
 and the email account password. Folder names are hashed using SHA256 (thus not
 encrypted).
 
 Storing the account password (`save_pass=1` in main.conf) is *not* secure.
-While falanet encrypts the password, the key is trivial to determine from
+While falaclient encrypts the password, the key is trivial to determine from
 the source code. Only store the password if measurements are taken to ensure
-`~/.config/falanet/secret.conf` cannot by accessed by a third-party.
+`~/.config/falaclient/secret.conf` cannot by accessed by a third-party.
 
 
 Configuration
 =============
 
 Aside from `main.conf` covered above, the following files can be used to
-configure falanet.
+configure falaclient.
 
-~/.config/falanet/ui.conf
+~/.config/falaclient/ui.conf
 -----------------------
-This configuration file controls the UI aspects of falanet. Default configuration
+This configuration file controls the UI aspects of falaclient. Default configuration
 file (platform-dependent defaults are left empty below):
 
     attachment_indicator=📎
@@ -573,14 +578,14 @@ Enable terminal color output (default enabled).
 ### compose_backup_interval
 
 Specify interval in seconds for local backups during compose (default 10).
-If the system running falanet is unexpectedly shutdown while user is composing
-an email, then upon next falanet startup any backuped compose message will be
+If the system running falaclient is unexpectedly shutdown while user is composing
+an email, then upon next falaclient startup any backuped compose message will be
 automatically uploaded to the draft folder.
 Setting this parameter to 0 disables local backups.
 
 ### compose_line_wrap
 
-Specify how falanet shall wrap lines in outgoing emails. Supported options:
+Specify how falaclient shall wrap lines in outgoing emails. Supported options:
 
     0 = none (default)
     1 = using format=flowed
@@ -593,8 +598,8 @@ prompt (default disabled).
 
 ### full_header_include_local
 
-While viewing full headers (by pressing `h`) falanet displays RFC 822 headers
-by default. This parameter allows enabling falanet to also display local /
+While viewing full headers (by pressing `h`) falaclient displays RFC 822 headers
+by default. This parameter allows enabling falaclient to also display local /
 internal header fields, such as server timestamp. Default disabled.
 
 ### help_enabled
@@ -615,8 +620,8 @@ bindings may be specified in the following formats:
 - Plain-text lower-case ASCII (ex: `r`)
 - Disable key binding (`KEY_NONE`)
 
-To determine the key code sequence for a key, one can run falanet in key code
-dump mode `falanet -k` which will output the octal code, and ncurses macro name
+To determine the key code sequence for a key, one can run falaclient in key code
+dump mode `falaclient -k` which will output the octal code, and ncurses macro name
 (if present).
 
 ### localized_subject_prefixes
@@ -639,10 +644,10 @@ For a German user:
 
 ### markdown_html_compose
 
-Default value for each new email, whether falanet shall enable markdown HTML
-compose. I.e. whether falanet shall generate a text/html message part based on
+Default value for each new email, whether falaclient shall enable markdown HTML
+compose. I.e. whether falaclient shall generate a text/html message part based on
 processing the composed message as Markdown, when sending sending emails from
-falanet. This can be overridden on a per-email basis by pressing CTRL-N when
+falaclient. This can be overridden on a per-email basis by pressing CTRL-N when
 editing an email (default disabled).
 
 ### new_msg_bell
@@ -681,7 +686,7 @@ mode (default enabled).
 ### plain_text
 
 Determines whether showing plain text (vs. html converted to text) is
-preferred. If the preferred email part is not present, falanet automatically
+preferred. If the preferred email part is not present, falaclient automatically
 attempts to show the other. This option can be re-configured at run-time
 by pressing `t` when viewing an email (default enabled).
 
@@ -691,16 +696,16 @@ Allow postponing email compose without confirmation prompt (default disabled).
 
 ### quit_without_confirm
 
-Allow exiting falanet without confirmation prompt (default enabled).
+Allow exiting falaclient without confirmation prompt (default enabled).
 
 ### respect_format_flowed
 
-Specify whether falanet shall respect email line wrapping of format=flowed
+Specify whether falaclient shall respect email line wrapping of format=flowed
 type (default enabled).
 
 ### rewrap_quoted_lines
 
-Control whether falanet shall rewrap quoted lines (default enabled).
+Control whether falaclient shall rewrap quoted lines (default enabled).
 
 ### search_show_folder
 
@@ -722,7 +727,7 @@ enabled).
 
 ### show_progress
 
-Specify how falanet shall show progress indication when fetching or indexing
+Specify how falaclient shall show progress indication when fetching or indexing
 emails. Supported options:
 
     0 = disabled
@@ -738,9 +743,9 @@ an email (default disabled).
 ### signature
 
 Determines whether to suffix emails with a signature (default disabled). When
-enabled, falanet will use `~/.config/falanet/signature.txt` if present, or
+enabled, falaclient will use `~/.config/falaclient/signature.txt` if present, or
 otherwise use `~/.signature` for signature plain text content. When composing
-markdown formatted emails, falanet will use `~/.config/falanet/signature.html` if
+markdown formatted emails, falaclient will use `~/.config/falaclient/signature.html` if
 present, for the html part, and otherwise simply convert the plain text
 signature to html.
 
@@ -753,12 +758,12 @@ Example signature files: [signature.txt](/doc/signature.txt),
 
 ### tab_size
 
-Tabs are expanded to spaces when viewed in falanet. This parameter controls the
+Tabs are expanded to spaces when viewed in falaclient. This parameter controls the
 space between tab stops (default 8).
 
 ### terminal_title
 
-Specifies custom terminal title, ex: `terminal_title=falanet - d99kris@email.com`.
+Specifies custom terminal title, ex: `terminal_title=falaclient - d99kris@email.com`.
 
 ### unread_indicator
 
@@ -766,25 +771,25 @@ Controls which character to indicate that an email is unread (default: `N`).
 For a more graphical interface, a character such as `*` can be used.
 
 
-~/.config/falanet/colors.conf
+~/.config/falaclient/colors.conf
 ---------------------------
-This configuration file controls the configurable colors of falanet. For this
+This configuration file controls the configurable colors of falaclient. For this
 configuration to take effect, `colors_enabled=1` must be set in
-`~/.config/falanet/ui.conf`.
+`~/.config/falaclient/ui.conf`.
 
-Example color config files are provided in `/usr/local/share/falanet/themes`
-and can be used by overwriting `~/.config/falanet/colors.conf`.
+Example color config files are provided in `/usr/local/share/falaclient/themes`
+and can be used by overwriting `~/.config/falaclient/colors.conf`.
 
 ### Htop style theme
 
 This color theme is similar to htop's default, see screenshot below with
-falanet and htop.
+falaclient and htop.
 
-![screenshot falanet htop style theme](/doc/screenshot-falanet-htop-theme.png)
+![screenshot falaclient htop style theme](/doc/screenshot-falaclient-htop-theme.png)
 
 To use this config:
 
-    cp /usr/local/share/falanet/themes/htop-style.conf ~/.config/falanet/colors.conf
+    cp /usr/local/share/falaclient/themes/htop-style.conf ~/.config/falaclient/colors.conf
 
 ### Manual configuration
 
@@ -858,10 +863,10 @@ Top / title bar.
 Accessing Email Cache using Other Email Clients
 ===============================================
 
-The falanet message cache may be exported to the Maildir format using the
+The falaclient message cache may be exported to the Maildir format using the
 following command:
 
-    falanet --export ~/Maildir
+    falaclient --export ~/Maildir
 
 A basic `~/.muttrc` config file for reading the exported Maildir in `mutt`:
 
@@ -870,10 +875,10 @@ A basic `~/.muttrc` config file for reading the exported Maildir in `mutt`:
     set folder="~/Maildir"
     set mask=".*"
 
-Note: falanet is not designed for working with other email clients, this export
+Note: falaclient is not designed for working with other email clients, this export
 option is mainly available as a data recovery option in case access to an
 email account is lost, and one needs a local Maildir archive to import into
-a new email account. Such import is not supported by falanet, but is supported
+a new email account. Such import is not supported by falaclient, but is supported
 by some other email clients, like Thunderbird.
 
 
@@ -882,7 +887,7 @@ Technical Details
 
 Third-party Libraries
 ---------------------
-falanet is implemented in C++. Its source tree includes the source code from the
+falaclient is implemented in C++. Its source tree includes the source code from the
 following third-party libraries:
 
 - [apathy](https://github.com/dlecocq/apathy) -
@@ -908,4 +913,4 @@ Uncrustify is used to maintain consistent source code formatting, example:
 License
 =======
 
-falanet is distributed under the MIT license. See [LICENSE](/LICENSE) file.
+falaclient is distributed under the MIT license. See [LICENSE](/LICENSE) file.

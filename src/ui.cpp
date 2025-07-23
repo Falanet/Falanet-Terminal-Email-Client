@@ -3,7 +3,7 @@
 // Copyright (c) 2019-2024 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "ui.h"
 
@@ -6030,7 +6030,7 @@ void Ui::MessageFindNext()
 
 void Ui::Quit()
 {
-  if (m_QuitWithoutConfirm || Ui::PromptYesNo("Quit falanet (y/n)?"))
+  if (m_QuitWithoutConfirm || Ui::PromptYesNo("Quit falaclient (y/n)?"))
   {
     StatusUpdate statusUpdate;
     statusUpdate.SetFlags = m_Status.IsSet(Status::FlagConnected) ? Status::FlagDisconnecting
@@ -7534,7 +7534,7 @@ void Ui::DrawBeautifulTopBar()
   ApplyBeautifulColors(m_TopWin, COLOR_BEAUTIFUL_HEADER);
   
   // Create a beautiful title with icons
-  std::string title = "Falanet";
+  std::string title = "Falaclient";
   int titleX = (m_ScreenWidth - title.length()) / 2;
   if (titleX > 0) {
     mvwaddstr(m_TopWin, 0, titleX, title.c_str());

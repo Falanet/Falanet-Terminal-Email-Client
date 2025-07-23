@@ -3,7 +3,7 @@
 // Copyright (c) 2019-2024 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "util.h"
 
@@ -536,16 +536,16 @@ std::string Util::GetDefaultHtmlToTextConvertCmd()
   std::string result;
   const std::string& commandOutPath = Util::GetTempFilename(".txt");
   const std::string& command =
-    std::string("which html2falanet pandoc w3m lynx elinks 2> /dev/null | head -1 > ") + commandOutPath;
+    std::string("which html2falaclient pandoc w3m lynx elinks 2> /dev/null | head -1 > ") + commandOutPath;
   if (system(command.c_str()) == 0)
   {
     std::string output = Util::ReadFile(commandOutPath);
     output.erase(std::remove(output.begin(), output.end(), '\n'), output.end());
     if (!output.empty())
     {
-      if (output.find("/html2falanet") != std::string::npos)
+      if (output.find("/html2falaclient") != std::string::npos)
       {
-        result = "html2falanet";
+        result = "html2falaclient";
       }
       else if (output.find("/pandoc") != std::string::npos)
       {
@@ -2301,8 +2301,8 @@ std::string Util::GetDefaultApplicationDir()
   char* homeEnv = getenv("HOME");
   static const std::string homeDir = std::string((homeEnv != nullptr) ? homeEnv : "");
 
-  // Use old ~/.falanet if present, for backward compatibility
-  static const std::string legacyApplicationDir = homeDir + "/.falanet";
+  // Use old ~/.falaclient if present, for backward compatibility
+  static const std::string legacyApplicationDir = homeDir + "/.falaclient";
   if (IsDir(legacyApplicationDir))
   {
     return legacyApplicationDir;
@@ -2313,7 +2313,7 @@ std::string Util::GetDefaultApplicationDir()
   static const std::string xdgConfigHomeDir = std::string((xdgConfigHomeEnv != nullptr) ? xdgConfigHomeEnv : "");
   static const std::string configHomeDir = (!xdgConfigHomeDir.empty() ? xdgConfigHomeDir : (homeDir + "/.config"));
 
-  // Typically: ~/.config/falanet
-  static const std::string applicationDir = configHomeDir + "/falanet";
+  // Typically: ~/.config/falaclient
+  static const std::string applicationDir = configHomeDir + "/falaclient";
   return applicationDir;
 }

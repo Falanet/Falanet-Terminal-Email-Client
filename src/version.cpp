@@ -3,7 +3,7 @@
 // Copyright (c) 2022-2024 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "version.h"
 
@@ -41,5 +41,5 @@ std::string Version::GetCompiler()
 
 std::string Version::GetAppName(bool p_WithVersion)
 {
-  return std::string("falanet") + (p_WithVersion ? " " NMAIL_VERSION : "");
+  return std::string("falaclient") + (p_WithVersion ? " " NMAIL_VERSION : "");
 }

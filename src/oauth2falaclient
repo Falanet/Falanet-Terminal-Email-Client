@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-# oauth2falanet
+# oauth2falaclient
 #
 # Copyright (c) 2021-2023 Kristofer Berggren
 # All rights reserved.
 #
-# falanet is distributed under the MIT license, see LICENSE for details.
+# falaclient is distributed under the MIT license, see LICENSE for details.
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
@@ -81,11 +81,11 @@ def show_help():
 
 
 def show_version():
-    print("oauth2falanet v" + version)
+    print("oauth2falaclient v" + version)
     print("")
     print("Copyright (c) 2021-2023 Kristofer Berggren")
     print("")
-    print("oauth2falanet is distributed under the MIT license.")
+    print("oauth2client is distributed under the MIT license.")
     print("")
     print("Written by Kristofer Berggren.")
 

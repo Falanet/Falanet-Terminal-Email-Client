@@ -1,9 +1,14 @@
 // lockfile.cpp
 //
+// Copyright (c) 2019-2023 Kristofer Berggren
+// All rights reserved.
+//
+// falaclient is distributed under the MIT license, see LICENSE for details.kfile.cpp
+//
 // Copyright (c) 2019-2021 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include "lockfile.h"
 

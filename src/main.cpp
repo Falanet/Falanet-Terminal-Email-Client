@@ -3,7 +3,7 @@
 // Copyright (c) 2019-2024 Kristofer Berggren
 // All rights reserved.
 //
-// falanet is distributed under the MIT license, see LICENSE for details.
+// falaclient is distributed under the MIT license, see LICENSE for details.
 
 #include <iostream>
 #include <memory>
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
   {
     std::cerr <<
       "error: unable to acquire lock for " << Util::GetApplicationDir() << "\n" <<
-      "       only one falanet session per account/confdir is supported.\n";
+      "       only one falaclient session per account/confdir is supported.\n";
     return 1;
   }
 
@@ -460,10 +460,10 @@ static void ShowHelp()
   std::cout <<
     "Terminal-based email client for Falanet Mail Service\n"
     "\n"
-    "Usage: falanet [OPTION]\n"
+    "Usage: falaclient [OPTION]\n"
     "\n"
     "Options:\n"
-    "   -d, --confdir <DIR>        use a different directory than ~/.config/falanet\n"
+    "   -d, --confdir <DIR>        use a different directory than ~/.config/falaclient\n"
     "   -e, --verbose              enable verbose logging\n"
     "   -ee, --extra-verbose       enable extra verbose logging\n"
     "   -h, --help                 display this help and exit\n"
@@ -474,29 +474,29 @@ static void ShowHelp()
     "   -x, --export <DIR>         export cache to specified dir in Maildir format\n"
     "\n"
     "Examples:\n"
-    "   falanet                      running falanet without setup wizard will generate\n"
-    "                              default configuration files in the falanet dir if\n"
+    "   falaclient                      running falaclient without setup wizard will generate\n"
+    "                              default configuration files in the falaclient dir if\n"
     "                              not present already, these can be edited to\n"
-    "                              configure falanet for email service providers not\n"
+    "                              configure falaclient for email service providers not\n"
     "                              supported by the built-in setup wizard (refer to\n"
     "                              FILES section for details)\n"
     "\n"
     "Files:\n"
-    "   ~/.config/falanet/main.conf  configures mail account and general settings,\n"
+    "   ~/.config/falaclient/main.conf  configures mail account and general settings,\n"
     "                              for full functionality the following fields\n"
     "                              shall be configured:\n"
-    "                              address (ex: example@falanet.org,\n"
+    "                              address (ex: example@falaclient.org,\n"
     "                              drafts (folder name, ex: Drafts),\n"
-    "                              imap_host (ex: mail.falanet.org),\n"
+    "                              imap_host (ex: mail.falaclient.org),\n"
     "                              imap_port (ex: 993),\n"
     "                              inbox (folder name, ex: Inbox),\n"
     "                              name (ex: Firstname Lastname),\n"
     "                              sent (folder name, ex: Sent),\n"
-    "                              smtp_host (ex: mail.falanet.org),\n"
+    "                              smtp_host (ex: mail.falaclient.org),\n"
     "                              smtp_port (ex: 587),\n"
     "                              trash (folder name, ex: Trash),\n"
     "                              user (ex: example@example.com or example).\n"
-    "   ~/.config/falanet/ui.conf    customizes UI settings\n"
+    "   ~/.config/falaclient/ui.conf    customizes UI settings\n"
     "\n"
     "Report bugs at https://github.com/Falanet\n"
     "\n";
@@ -509,7 +509,7 @@ static void ShowVersion()
     "\n"
     "Copyright (c) 2019-2024 Kristofer Berggren\n"
     "\n"
-    "falanet is distributed under the MIT license.\n"
+    "falaclient is distributed under the MIT license.\n"
     "\n"
     "Written by Kristofer Berggren.\n";
 }
