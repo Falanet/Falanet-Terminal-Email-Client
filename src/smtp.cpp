@@ -22,6 +22,8 @@
 #ifdef __OpenBSD__
 #include <uuid.h>
 #include <ctime>
+#include <cstdlib>
+#include <sys/types.h>
 #else
 #include <uuid/uuid.h>
 #endif
@@ -720,6 +722,13 @@ std::string Smtp::GenerateMessageId() const
   uuid_t uuid;
   uint32_t status;
   char* uuid_str;
+  
+  // Seed the random number generator with better entropy
+  static bool seeded = false;
+  if (!seeded) {
+    srandom(time(NULL) + getpid() + (uintptr_t)this);
+    seeded = true;
+  }
   
   uuid_create(&uuid, &status);
   if (status != uuid_s_ok)

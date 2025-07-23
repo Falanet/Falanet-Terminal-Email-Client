@@ -1581,15 +1581,16 @@ int imap_address_to_mailbox(struct mailimap_address * imap_addr,
     }
   }
   else {
-    addr = malloc(strlen(imap_addr->ad_mailbox_name) +
-        strlen(imap_addr->ad_host_name) + 2);
+    size_t mailbox_len = strlen(imap_addr->ad_mailbox_name);
+    size_t host_len = strlen(imap_addr->ad_host_name);
+    addr = malloc(mailbox_len + host_len + 2);
     if (addr == NULL) {
       res = MAIL_ERROR_MEMORY;
       goto free_name;
     }
-    strcpy(addr, imap_addr->ad_mailbox_name);
-    strcat(addr, "@");
-    strcat(addr, imap_addr->ad_host_name);
+    strlcpy(addr, imap_addr->ad_mailbox_name, mailbox_len + host_len + 2);
+    strlcat(addr, "@", mailbox_len + host_len + 2);
+    strlcat(addr, imap_addr->ad_host_name, mailbox_len + host_len + 2);
   }
 
   mb = mailimf_mailbox_new(dsp_name, addr);

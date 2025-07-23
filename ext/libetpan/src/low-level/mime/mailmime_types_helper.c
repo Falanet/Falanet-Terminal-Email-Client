@@ -515,7 +515,11 @@ char * mailmime_generate_boundary(void)
   long value;
 
   now = time(NULL);
+#ifdef __OpenBSD__
+  value = arc4random();
+#else
   value = random();
+#endif
 
   gethostname(name, MAX_MESSAGE_ID);
   snprintf(id, MAX_MESSAGE_ID, "%llx_%lx_%x", (long long)now, value, getpid());
