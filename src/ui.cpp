@@ -34,6 +34,19 @@ static inline int mvwaddnwstr_compat(WINDOW* win, int y, int x, const wchar_t* w
   return mvwaddnstr(win, y, x, s.c_str(), s.size());
 }
 #define mvwaddnwstr mvwaddnwstr_compat
+
+// OpenBSD ncurses doesn't have get_wch, so we use getch instead
+static inline int get_wch_compat(wint_t* wch)
+{
+  int ch = getch();
+  if (ch == ERR)
+  {
+    return ERR;
+  }
+  *wch = ch;
+  return OK;
+}
+#define get_wch get_wch_compat
 #endif
 
 bool Ui::s_Running = false;
