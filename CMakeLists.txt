@@ -151,8 +151,14 @@ find_package(OpenSSL REQUIRED)
 find_library(MAGIC_LIBRARY NAMES magic REQUIRED)
 find_path(MAGIC_INCLUDE_DIR magic.h REQUIRED)
 
-find_library(UUID_LIBRARY NAMES uuid REQUIRED)
-find_path(UUID_INCLUDE_DIR uuid/uuid.h REQUIRED)
+# UUID library handling - different on OpenBSD
+if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  find_library(UUID_LIBRARY NAMES ossp-uuid uuid PATHS /usr/local/lib REQUIRED)
+  find_path(UUID_INCLUDE_DIR uuid.h PATHS /usr/local/include REQUIRED)
+else()
+  find_library(UUID_LIBRARY NAMES uuid REQUIRED)
+  find_path(UUID_INCLUDE_DIR uuid/uuid.h REQUIRED)
+endif()
 
 find_library(XAPIAN_LIBRARY NAMES xapian REQUIRED)
 find_path(XAPIAN_INCLUDE_DIR xapian.h REQUIRED)
