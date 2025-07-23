@@ -11,6 +11,7 @@
 #include <string>
 
 #include <sys/time.h>
+#include <sys/wait.h>
 
 #include "cacheutil.h"
 #include "config.h"

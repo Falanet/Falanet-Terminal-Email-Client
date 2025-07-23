@@ -9,6 +9,7 @@
 
 #include <mutex>
 #include <string>
+#include <stdarg.h>
 
 class Log
 {
