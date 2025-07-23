@@ -15,6 +15,10 @@ include(CheckIncludeFiles)
 # Functions
 function(check_include_add_define header define loglevel)
   set(CMAKE_REQUIRED_INCLUDES ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES})
+  # Add OpenBSD specific include paths for header detection
+  if (${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD")
+    list(APPEND CMAKE_REQUIRED_INCLUDES "/usr/local/include")
+  endif()
   check_include_files(${header} ${define} LANGUAGE C)
   if(${define})
     target_compile_definitions(${LIBNAME} PRIVATE ${define}=1)
@@ -273,6 +277,10 @@ target_include_directories(${LIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/includ
 # OpenBSD specific include paths
 if (${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD")
   target_include_directories(${LIBNAME} PRIVATE /usr/local/include)
+  # Also add specific path for libiconv if it exists
+  if(EXISTS "/usr/local/include/iconv.h")
+    message(STATUS "Found libiconv headers in /usr/local/include")
+  endif()
 endif()
 
 # Headers - Standard
@@ -385,12 +393,20 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif()
 # Linking (OpenBSD and other Unix systems that need iconv library)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD|FreeBSD|NetBSD")
-  find_library(ICONV_LIBRARY iconv PATHS /usr/local/lib)
+  # Try to find libiconv first (GNU iconv), then fall back to system iconv
+  find_library(ICONV_LIBRARY NAMES iconv libiconv PATHS /usr/local/lib /usr/lib)
   if(ICONV_LIBRARY)
     target_link_libraries(${LIBNAME} PUBLIC "${ICONV_LIBRARY}")
     message(STATUS "Found iconv library: ${ICONV_LIBRARY}")
   else()
-    message(WARNING "iconv library not found, build may fail")
+    # On OpenBSD, try to find the specific libiconv
+    find_library(LIBICONV_LIBRARY NAMES iconv PATHS /usr/local/lib REQUIRED)
+    if(LIBICONV_LIBRARY)
+      target_link_libraries(${LIBNAME} PUBLIC "${LIBICONV_LIBRARY}")
+      message(STATUS "Found libiconv library: ${LIBICONV_LIBRARY}")
+    else()
+      message(WARNING "Neither iconv nor libiconv library found, build may fail")
+    endif()
   endif()
 endif()
 
