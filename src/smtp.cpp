@@ -18,7 +18,12 @@
 #include <libetpan/mailimf.h>
 #include <libetpan/mailmime.h>
 #include <libetpan/mailsmtp.h>
+
+#ifdef __OpenBSD__
+#include <uuid.h>
+#else
 #include <uuid/uuid.h>
+#endif
 
 #include "auth.h"
 #include "log.h"
@@ -710,11 +715,25 @@ std::string Smtp::RemoveBccHeader(const std::string& p_Data)
 
 std::string Smtp::GenerateMessageId() const
 {
+#ifdef __OpenBSD__
+  uuid_t* uuid;
+  char* uuid_str;
+  
+  uuid_create(&uuid);
+  uuid_to_string(uuid, &uuid_str, NULL);
+  std::string result = std::string(uuid_str) + "@" + Util::GetDomainName(m_Host);
+  
+  free(uuid_str);
+  uuid_destroy(uuid);
+  
+  return result;
+#else
   uuid_t uuid;
   char uuid_str[37];
   uuid_generate(uuid);
   uuid_unparse(uuid, uuid_str);
   return std::string(uuid_str) + "@" + Util::GetDomainName(m_Host);
+#endif
 }
 
 void Smtp::Logger(mailsmtp* p_Smtp, int p_LogType, const char* p_Buffer, size_t p_Size,
