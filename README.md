@@ -132,11 +132,11 @@ doas ln -s /usr/local/include/ossp/uuid.h /usr/local/include/uuid/uuid.h
 # Then build with specific library paths:
 cmake .. \
   -DCURSES_INCLUDE_PATH=/usr/include \
-  -DCURSES_LIBRARY=/usr/lib/libcurses.so \
+  -DCURSES_LIBRARY=/usr/lib/libcurses.a \
   -DUUID_INCLUDE_DIR=/usr/local/include \
   -DUUID_LIBRARY=/usr/local/lib/libossp-uuid.a \
   -DICONV_INCLUDE_DIR=/usr/local/include \
-  -DICONV_LIBRARY=/usr/local/lib/libiconv.so
+  -DICONV_LIBRARY=/usr/local/lib/libiconv.a
 ```
 
 </details>

@@ -358,10 +358,12 @@ endif()
 # NCurses
 target_compile_options(falaclient PUBLIC ${CURSES_CFLAGS})
 
-# Check for execinfo.h
-check_include_file(execinfo.h HAVE_EXECINFO_H)
-if(HAVE_EXECINFO_H)
-  target_compile_definitions(falaclient PRIVATE HAVE_EXECINFO_H=1)
+# Check for execinfo.h (but exclude OpenBSD which doesn't have backtrace functions)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  check_include_file(execinfo.h HAVE_EXECINFO_H)
+  if(HAVE_EXECINFO_H)
+    target_compile_definitions(falaclient PRIVATE HAVE_EXECINFO_H=1)
+  endif()
 endif()
 
 # Library linking
