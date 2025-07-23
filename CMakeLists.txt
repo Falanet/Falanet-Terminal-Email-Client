@@ -153,7 +153,7 @@ find_path(MAGIC_INCLUDE_DIR magic.h REQUIRED)
 
 # UUID library handling - different on OpenBSD
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
-  find_library(UUID_LIBRARY NAMES ossp-uuid uuid PATHS /usr/local/lib REQUIRED)
+  find_library(UUID_LIBRARY NAMES libossp-uuid PATHS /usr/local/lib REQUIRED)
   find_path(UUID_INCLUDE_DIR uuid.h PATHS /usr/local/include REQUIRED)
 else()
   find_library(UUID_LIBRARY NAMES uuid REQUIRED)
