@@ -1752,6 +1752,12 @@ void Ui::DrawMessageListSearch()
 void Ui::DrawMessage()
 {
   werase(m_MainWin);
+  
+  // Set background color for the entire message area
+  if (m_ColorsEnabled)
+  {
+    wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+  }
 
   const std::string& folder = m_CurrentFolderUid.first;
   const int uid = m_CurrentFolderUid.second;
@@ -2105,6 +2111,12 @@ void Ui::DrawComposeMessage()
   }
 
   werase(m_MainWin);
+  
+  // Set background color for the entire compose area
+  if (m_ColorsEnabled)
+  {
+    wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+  }
 
   std::vector<std::wstring> composeLines;
 
@@ -7474,6 +7486,7 @@ void Ui::InitBeautifulColors()
   init_pair(COLOR_MESSAGE_TEXT, COLOR_WHITE, COLOR_BLACK);
   init_pair(COLOR_SEARCH_MATCH, COLOR_BLACK, COLOR_YELLOW);
   init_pair(COLOR_ATTACHMENT_INFO, COLOR_MAGENTA, COLOR_BLACK);
+  init_pair(COLOR_MESSAGE_BACKGROUND, COLOR_WHITE, COLOR_BLACK);
   
   // Store color pairs in array
   m_BeautifulColors[COLOR_BEAUTIFUL_HEADER] = COLOR_PAIR(COLOR_BEAUTIFUL_HEADER);
@@ -7494,6 +7507,7 @@ void Ui::InitBeautifulColors()
   m_BeautifulColors[COLOR_MESSAGE_TEXT] = COLOR_PAIR(COLOR_MESSAGE_TEXT);
   m_BeautifulColors[COLOR_SEARCH_MATCH] = COLOR_PAIR(COLOR_SEARCH_MATCH);
   m_BeautifulColors[COLOR_ATTACHMENT_INFO] = COLOR_PAIR(COLOR_ATTACHMENT_INFO);
+  m_BeautifulColors[COLOR_MESSAGE_BACKGROUND] = COLOR_PAIR(COLOR_MESSAGE_BACKGROUND);
 }
 
 std::string Ui::GetUnicodeSymbol(UISymbols symbol)
