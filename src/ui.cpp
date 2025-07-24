@@ -556,6 +556,13 @@ void Ui::DrawAll()
 
     default:
       werase(m_MainWin);
+      
+      // Set background color for default state
+      if (m_ColorsEnabled)
+      {
+        wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+      }
+      
       mvwprintw(m_MainWin, 0, 0, "Unimplemented state %d", m_State);
       wrefresh(m_MainWin);
       break;
@@ -966,6 +973,12 @@ void Ui::DrawFolderList()
   }
 
   werase(m_MainWin);
+  
+  // Set background color for the entire folder list area
+  if (m_ColorsEnabled)
+  {
+    wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+  }
 
   std::set<std::string> folders;
 
@@ -1095,6 +1108,12 @@ void Ui::DrawFolderList()
 void Ui::DrawAddressList()
 {
   werase(m_MainWin);
+  
+  // Set background color for the entire address list area
+  if (m_ColorsEnabled)
+  {
+    wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+  }
 
   static std::wstring lastAddressListFilterStr = m_AddressListFilterStr;
   if (m_AddressListFilterStr != lastAddressListFilterStr)
@@ -1148,6 +1167,12 @@ void Ui::DrawAddressList()
 void Ui::DrawFileList()
 {
   werase(m_MainWin);
+  
+  // Set background color for the entire file list area
+  if (m_ColorsEnabled)
+  {
+    wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+  }
 
   std::set<Fileinfo, FileinfoCompare> files;
 
@@ -1299,6 +1324,12 @@ void Ui::DrawMessageList()
     }
 
     werase(m_MainWin);
+    
+    // Set background color for the entire message list area
+    if (m_ColorsEnabled)
+    {
+      wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+    }
 
     int idxOffs = Util::Bound(0, (int)(m_MessageListCurrentIndex[m_CurrentFolder] -
                                        ((m_MainWinHeight - 1) / 2)),
@@ -1569,6 +1600,12 @@ void Ui::DrawMessageListSearch()
     const std::string& currentDate = Header::GetCurrentDate();
 
     werase(m_MainWin);
+    
+    // Set background color for the entire search results area
+    if (m_ColorsEnabled)
+    {
+      wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+    }
 
     for (int i = idxOffs; i < idxMax; ++i)
     {
@@ -2190,6 +2227,12 @@ void Ui::DrawComposeMessage()
 void Ui::DrawPartList()
 {
   werase(m_MainWin);
+  
+  // Set background color for the entire part list area
+  if (m_ColorsEnabled)
+  {
+    wbkgd(m_MainWin, m_BeautifulColors[COLOR_MESSAGE_BACKGROUND]);
+  }
 
   std::lock_guard<std::mutex> lock(m_Mutex);
   const std::string& folder = m_CurrentFolderUid.first;
